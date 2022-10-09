@@ -1382,6 +1382,13 @@ int mpu_set_lpf(unsigned short lpf)
 
     if (st.chip_cfg.lpf == data)
         return 0;
+#ifdef MPU6500
+    /* 
+     * 防止FIFO满时，新数据覆盖旧数据，导致FIFO中数据被破坏 
+     * 具体表现为FIFO读取速度慢时，偶尔读到一个错误值
+     */
+    data |= 0x40;
+#endif
     if (i2c_write(st.hw->addr, st.reg->lpf, 1, &data))
         return -1;
     st.chip_cfg.lpf = data;
