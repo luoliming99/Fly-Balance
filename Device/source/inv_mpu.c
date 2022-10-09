@@ -23,6 +23,7 @@
 #include <string.h>
 #include <math.h>
 #include "inv_mpu.h"
+#include "ch32f20x.h"
 
 /* The following functions must be defined for this platform:
  * i2c_write(unsigned char slave_addr, unsigned char reg_addr,
@@ -115,6 +116,16 @@ static inline int reg_int_cb(struct int_param_s *int_param)
 /* UC3 is a 32-bit processor, so abs and labs are equivalent. */
 #define labs        abs
 #define fabs(x)     (((x)>0)?(x):-(x))
+
+#elif defined CH32F20x_D6
+#include "bsp_i2c.h"
+#include "bsp_systick.h"
+#define i2c_write   i2c_write
+#define i2c_read    i2c_read
+#define delay_ms    delay_ms
+#define get_ms      get_ms
+#define log_i       printf
+#define min(a,b)    (a < b ? a : b)
 #else
 #error  Gyro driver is missing the system layer implementations.
 #endif
@@ -711,7 +722,8 @@ int mpu_read_reg(unsigned char reg, unsigned char *data)
  *  @param[in]  int_param   Platform-specific parameters to interrupt API.
  *  @return     0 if successful.
  */
-int mpu_init(struct int_param_s *int_param)
+//int mpu_init(struct int_param_s *int_param)
+int mpu_init(void)
 {
     unsigned char data[6];
 
@@ -760,18 +772,18 @@ int mpu_init(struct int_param_s *int_param)
     st.chip_cfg.dmp_loaded = 0;
     st.chip_cfg.dmp_sample_rate = 0;
 
-    if (mpu_set_gyro_fsr(2000))
+    if (mpu_set_gyro_fsr(2000))     /* ¡À2000¡ã/S */
         return -1;
-    if (mpu_set_accel_fsr(2))
+    if (mpu_set_accel_fsr(4))       /* ¡À4g */
         return -1;
-    if (mpu_set_lpf(42))
+    if (mpu_set_lpf(125))           /* bandWidth=98Hz,fout=1kHz */
         return -1;
-    if (mpu_set_sample_rate(50))
+    if (mpu_set_sample_rate(250))   /* fsamp=250Hz */
         return -1;
     if (mpu_configure_fifo(0))
         return -1;
 
-#ifndef EMPL_TARGET_STM32F4    
+#ifndef CH32F20x_D6 
     if (int_param)
         reg_int_cb(int_param);
 #endif
