@@ -5,7 +5,6 @@
 #include "bsp_pwm.h"
 
 #include "led.h"
-#include "charge.h"
 #include "mpu6500.h"
 #include "niming.h"
 #include "nrf24l01.h"
@@ -55,11 +54,9 @@ int main( void )
     printf("System clock frequency: %d Hz\r\n", SystemCoreClock);
 
     led_init();
-    charge_manager_init();
     
     delay_ms(500);
     ret = mpu_dmp_init();
-//    ret = mpu6500_init(i2c_read, i2c_write);
     printf("mpu6050_dmp_init %d\r\n", ret);
     
     ret = nrf24l01_init();
@@ -87,25 +84,12 @@ int main( void )
                 
     while (1)
     {
-//        if (STAT_CHARGING == charge_status_get())   /* 充电中 */
-//        {
-//            led_set(LED_RF, TOGGLE);
-//            delay_ms(400);
-//        }
-//        else                                        /* 充电结束 */
-//        {
-//            led_set(LED_RF, OFF);
-//        }
-        
         ret = mpu_dmp_get_data(&mpu_result_data);
-//        ret = mpu6500_read_raw_data(&mpu_result_data);
         if (ret == 0)   /* 200Hz */
         {   
             led_set(LED_RF, TOGGLE);
             niming_report_imu(&mpu_result_data);
             niming_report_data(&mpu_result_data);
-//            printf("%5d %5d %5d %5d %5d %5d\r\n", mpu_result_data.accel_xout, mpu_result_data.accel_yout, mpu_result_data.accel_zout,
-//                        mpu_result_data.gyro_xout, mpu_result_data.gyro_yout, mpu_result_data.gyro_zout);
 
             if (accelerator == 0)
             {
@@ -155,6 +139,7 @@ int main( void )
         ret = nrf24l01_rx_packet(nrf_buf);
         if (ret == 0)
         {   
+            led_set(LED_LF, TOGGLE);
             accelerator  = *(uint16_t *)&nrf_buf[0];
             pitch_target = *(int16_t *)&nrf_buf[2];
             roll_target  = *(int16_t *)&nrf_buf[4];

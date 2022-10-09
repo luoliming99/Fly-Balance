@@ -433,11 +433,6 @@
               <FilePath>..\Device\source\nrf24l01.c</FilePath>
             </File>
             <File>
-              <FileName>charge.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Device\source\charge.c</FilePath>
-            </File>
-            <File>
               <FileName>mpu6500.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Device\source\mpu6500.c</FilePath>
