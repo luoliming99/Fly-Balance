@@ -4,9 +4,9 @@
 /******************************************************************************/
 void motor_driver(which_motor_e motor, int16_t pwm)
 {
-    if (pwm > 999)
+    if (pwm > 1000)
     {
-        pwm = 999;
+        pwm = 1000;
     } 
     else if (pwm < 0)
     {

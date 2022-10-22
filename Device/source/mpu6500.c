@@ -92,8 +92,8 @@ int mpu6500_read_raw_data(mpu_result_t *p_data)
  * boards at Invensense. If needed, please modify the matrices to match the
  * chip-to-body matrix for your particular set up.
  */
-static signed char __gyro_orientation[9] = {0, -1, 0,
-                                            1, 0, 0,
+static signed char __gyro_orientation[9] = {-1, 0, 0,
+                                            0, -1, 0,
                                             0, 0, 1};
 
 static unsigned short __inv_row_2_scale(const signed char *row)
