@@ -10,6 +10,9 @@
 #include "ch32f20x_it.h"
 #include "bsp_uart.h"
 #include "bsp_systick.h"
+#include "bsp_tim.h"
+#include "bsp_exti.h"
+#include "encoder.h"
 
 /*********************************************************************
  * @fn      NMI_Handler
@@ -146,4 +149,32 @@ void DEBUG_USART_IRQHandler(void)
 	}	 
 }
 
+void EXTI_IRQHandler(void)
+{
+    encoder_dir_e dir;
+
+	if (EXTI_GetITStatus(EXTI_LINE) != RESET) 
+	{
+        dir = encoder_dir_get();
+        
+        if (dir == DIR_POS)
+            encoder_cnt_inc(1);
+        else
+            encoder_cnt_inc(-1);
+        
+		EXTI_ClearITPendingBit(EXTI_LINE);     
+	}
+}
+
+void  TIM_IRQHandler(void)
+{
+	if (TIM_GetITStatus(TIM_x, TIM_IT_Update) != RESET) 
+	{	
+        encoder_speed_calc();
+        encoder_cnt_clr();
+        printf("speed=%d (r/min)\r\n", encoder_speed_get());
+
+		TIM_ClearITPendingBit(TIM_x , TIM_FLAG_Update);  		 
+	}		 	
+}
 

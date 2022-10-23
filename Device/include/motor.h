@@ -5,10 +5,8 @@
 
 typedef enum
 {
-    MOTOR_LF = 0,   /* 左前方电机 */
-    MOTOR_RF,       /* 右前方电机 */
-    MOTOR_LB,       /* 左后方电机 */
-    MOTOR_RB        /* 右后方电机 */
+    MOTOR_L = 0,   /* 左方电机 */
+    MOTOR_R,       /* 右方电机 */
 } which_motor_e;
 
 void motor_driver(which_motor_e motor, int16_t pwm);

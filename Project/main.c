@@ -10,6 +10,7 @@
 #include "nrf24l01.h"
 #include "motor.h"
 #include "pid.h"
+#include "encoder.h"
 
 
 /*********************************************************************
@@ -55,6 +56,7 @@ int main( void )
     printf("System clock frequency: %d Hz\r\n", SystemCoreClock);
 
     led_init();
+    encoder_init();
     
     delay_ms(500);
 //    ret = mpu_dmp_init();
@@ -77,7 +79,11 @@ int main( void )
     delay_ms(400);
     led_set(LED_RB, TOGGLE);
                 
-    while (1)
+    motor_pwm[MOTOR_L] = 0;
+    motor_pwm[MOTOR_R] = 0;
+    motor_driver_all(motor_pwm);
+                
+    while (1);
     {
         led_set(LED_LF, ON);    /* 0.1ms/1ms */
         ret = mpu_dmp_get_data(&mpu_result_data);
@@ -90,10 +96,8 @@ int main( void )
 
             if (accelerator == 0)
             {
-                motor_pwm[MOTOR_LF] = 0;
-                motor_pwm[MOTOR_RF] = 0;
-                motor_pwm[MOTOR_LB] = 0;
-                motor_pwm[MOTOR_RB] = 0;
+                motor_pwm[MOTOR_L] = 0;
+                motor_pwm[MOTOR_R] = 0;
                 motor_driver_all(motor_pwm);
             }
             else
@@ -126,11 +130,11 @@ int main( void )
                 yaw_rate_pid.kd = 0;
                 pid_postion_cal(&yaw_rate_pid, yaw_angle_pid.out, mpu_result_data.gyro_zout >> 4);
 
-                motor_pwm[MOTOR_LF] =  pitch_rate_pid.out - roll_rate_pid.out - yaw_rate_pid.out + accelerator;
-                motor_pwm[MOTOR_RF] =  pitch_rate_pid.out + roll_rate_pid.out + yaw_rate_pid.out + accelerator;
-                motor_pwm[MOTOR_LB] = -pitch_rate_pid.out - roll_rate_pid.out + yaw_rate_pid.out + accelerator;
-                motor_pwm[MOTOR_RB] = -pitch_rate_pid.out + roll_rate_pid.out - yaw_rate_pid.out + accelerator;
-                motor_driver_all(motor_pwm);
+//                motor_pwm[MOTOR_LF] =  pitch_rate_pid.out - roll_rate_pid.out - yaw_rate_pid.out + accelerator;
+//                motor_pwm[MOTOR_RF] =  pitch_rate_pid.out + roll_rate_pid.out + yaw_rate_pid.out + accelerator;
+//                motor_pwm[MOTOR_LB] = -pitch_rate_pid.out - roll_rate_pid.out + yaw_rate_pid.out + accelerator;
+//                motor_pwm[MOTOR_RB] = -pitch_rate_pid.out + roll_rate_pid.out - yaw_rate_pid.out + accelerator;
+//                motor_driver_all(motor_pwm);
                 
                 led_set(LED_LB, OFF);
             }
