@@ -58,7 +58,7 @@ int main( void )
     
     delay_ms(500);
 //    ret = mpu_dmp_init();
-    printf("mpu6050_dmp_init %d\r\n", ret);
+    printf("mpu6500_dmp_init %d\r\n", ret);
     
     ret = nrf24l01_init();
     printf("nrf24l01_init %d\r\n", ret);
