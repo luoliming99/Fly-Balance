@@ -3,6 +3,7 @@
 #include "bsp_uart.h"
 #include "bsp_i2c.h"
 #include "bsp_pwm.h"
+#include "bsp_exti.h"
 
 #include "led.h"
 #include "mpu6500.h"
@@ -11,6 +12,8 @@
 #include "motor.h"
 #include "pid.h"
 
+
+uint8_t g_mpu_int = 0;
 
 /*********************************************************************
  * @fn      main
@@ -46,6 +49,7 @@ int main( void )
     uart_init();
     i2c_init();
     pwm_init();
+    exti_init();
     /*
      * SYSCLK = 144 MHz
      * HCLK   = 144 MHz
@@ -57,7 +61,7 @@ int main( void )
     led_init();
     
     delay_ms(500);
-//    ret = mpu_dmp_init();
+    ret = mpu_dmp_init();
     printf("mpu6500_dmp_init %d\r\n", ret);
     
     ret = nrf24l01_init();
@@ -79,60 +83,62 @@ int main( void )
                 
     while (1)
     {
-        led_set(LED_LF, ON);    /* 0.1ms/1ms */
-        ret = mpu_dmp_get_data(&mpu_result_data);
-        led_set(LED_LF, OFF);
-        if (ret == 0)   /* 200Hz */
-        {   
-            led_set(LED_RF, TOGGLE);
-//            niming_report_imu(&mpu_result_data);
-//            niming_report_data(&mpu_result_data);
+        if (1 == g_mpu_int) /* 200Hz */
+        {
+            g_mpu_int = 0;
+            ret = mpu_dmp_get_data(&mpu_result_data);   /* 12.5us */
+            if (ret == 0)   /* 200Hz */
+            {   
+                led_set(LED_RF, TOGGLE);
+//                niming_report_imu(&mpu_result_data);
+//                niming_report_data(&mpu_result_data);
 
-            if (accelerator == 0)
-            {
-                motor_pwm[MOTOR_LF] = 0;
-                motor_pwm[MOTOR_RF] = 0;
-                motor_pwm[MOTOR_LB] = 0;
-                motor_pwm[MOTOR_RB] = 0;
-                motor_driver_all(motor_pwm);
-            }
-            else
-            {
-                led_set(LED_LB, ON);    /* 20us */
+                if (accelerator == 0)
+                {
+                    motor_pwm[MOTOR_LF] = 0;
+                    motor_pwm[MOTOR_RF] = 0;
+                    motor_pwm[MOTOR_LB] = 0;
+                    motor_pwm[MOTOR_RB] = 0;
+                    motor_driver_all(motor_pwm);
+                }
+                else
+                {
+                    led_set(LED_LB, ON);    /* 20us */
 
-                pitch_angle_pid.kp = 4; //6
-                pitch_angle_pid.ki = 0;
-                pitch_angle_pid.kd = 0;
-                pid_postion_cal(&pitch_angle_pid, pitch_target, mpu_result_data.pitch);
-                roll_angle_pid.kp = 4;  //6
-                roll_angle_pid.ki = 0;
-                roll_angle_pid.kd = 0;
-                pid_postion_cal(&roll_angle_pid, roll_target, mpu_result_data.roll);
-                yaw_angle_pid.kp = 8;   //10
-                yaw_angle_pid.ki = 0;
-                yaw_angle_pid.kd = 0;
-                pid_postion_cal(&yaw_angle_pid, 0, mpu_result_data.yaw);
+                    pitch_angle_pid.kp = 4; //6
+                    pitch_angle_pid.ki = 0;
+                    pitch_angle_pid.kd = 0;
+                    pid_postion_cal(&pitch_angle_pid, pitch_target, mpu_result_data.pitch);
+                    roll_angle_pid.kp = 4;  //6
+                    roll_angle_pid.ki = 0;
+                    roll_angle_pid.kd = 0;
+                    pid_postion_cal(&roll_angle_pid, roll_target, mpu_result_data.roll);
+                    yaw_angle_pid.kp = 8;   //10
+                    yaw_angle_pid.ki = 0;
+                    yaw_angle_pid.kd = 0;
+                    pid_postion_cal(&yaw_angle_pid, 0, mpu_result_data.yaw);
 
-                pitch_rate_pid.kp = 3;
-                pitch_rate_pid.ki = 0;
-                pitch_rate_pid.kd = 10;
-                pid_postion_cal(&pitch_rate_pid, pitch_angle_pid.out, mpu_result_data.gyro_yout >> 4);
-                roll_rate_pid.kp = 3;
-                roll_rate_pid.ki = 0;
-                roll_rate_pid.kd = 10;
-                pid_postion_cal(&roll_rate_pid, roll_angle_pid.out, mpu_result_data.gyro_xout >> 4);
-                yaw_rate_pid.kp = 1;
-                yaw_rate_pid.ki = 0;
-                yaw_rate_pid.kd = 0;
-                pid_postion_cal(&yaw_rate_pid, yaw_angle_pid.out, mpu_result_data.gyro_zout >> 4);
+                    pitch_rate_pid.kp = 3;
+                    pitch_rate_pid.ki = 0;
+                    pitch_rate_pid.kd = 10;
+                    pid_postion_cal(&pitch_rate_pid, pitch_angle_pid.out, mpu_result_data.gyro_yout >> 4);
+                    roll_rate_pid.kp = 3;
+                    roll_rate_pid.ki = 0;
+                    roll_rate_pid.kd = 10;
+                    pid_postion_cal(&roll_rate_pid, roll_angle_pid.out, mpu_result_data.gyro_xout >> 4);
+                    yaw_rate_pid.kp = 1;
+                    yaw_rate_pid.ki = 0;
+                    yaw_rate_pid.kd = 0;
+                    pid_postion_cal(&yaw_rate_pid, yaw_angle_pid.out, mpu_result_data.gyro_zout >> 4);
 
-                motor_pwm[MOTOR_LF] =  pitch_rate_pid.out - roll_rate_pid.out - yaw_rate_pid.out + accelerator;
-                motor_pwm[MOTOR_RF] =  pitch_rate_pid.out + roll_rate_pid.out + yaw_rate_pid.out + accelerator;
-                motor_pwm[MOTOR_LB] = -pitch_rate_pid.out - roll_rate_pid.out + yaw_rate_pid.out + accelerator;
-                motor_pwm[MOTOR_RB] = -pitch_rate_pid.out + roll_rate_pid.out - yaw_rate_pid.out + accelerator;
-                motor_driver_all(motor_pwm);
-                
-                led_set(LED_LB, OFF);
+                    motor_pwm[MOTOR_LF] =  pitch_rate_pid.out - roll_rate_pid.out - yaw_rate_pid.out + accelerator;
+                    motor_pwm[MOTOR_RF] =  pitch_rate_pid.out + roll_rate_pid.out + yaw_rate_pid.out + accelerator;
+                    motor_pwm[MOTOR_LB] = -pitch_rate_pid.out - roll_rate_pid.out + yaw_rate_pid.out + accelerator;
+                    motor_pwm[MOTOR_RB] = -pitch_rate_pid.out + roll_rate_pid.out - yaw_rate_pid.out + accelerator;
+                    motor_driver_all(motor_pwm);
+                    
+                    led_set(LED_LB, OFF);
+                }
             }
         }
         

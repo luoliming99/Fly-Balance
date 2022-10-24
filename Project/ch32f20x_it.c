@@ -10,6 +10,7 @@
 #include "ch32f20x_it.h"
 #include "bsp_uart.h"
 #include "bsp_systick.h"
+#include "bsp_exti.h"
 
 /*********************************************************************
  * @fn      NMI_Handler
@@ -144,6 +145,17 @@ void DEBUG_USART_IRQHandler(void)
 		ch = USART_ReceiveData(DEBUG_USART);
         USART_SendData(DEBUG_USART, ch);    
 	}	 
+}
+
+extern uint8_t g_mpu_int;
+void EXTI_MPU_INT_IRQHandler(void)
+{
+	if (EXTI_GetITStatus(EXTI_MPU_INT_LINE) != RESET) 
+	{
+        g_mpu_int = 1;
+        
+		EXTI_ClearITPendingBit(EXTI_MPU_INT_LINE);     
+	}
 }
 
 

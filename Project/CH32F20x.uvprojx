@@ -477,6 +477,11 @@
               <FileType>1</FileType>
               <FilePath>..\BSP\source\bsp_pwm.c</FilePath>
             </File>
+            <File>
+              <FileName>bsp_exti.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\BSP\source\bsp_exti.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
