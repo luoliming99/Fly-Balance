@@ -20,7 +20,6 @@ void encoder_init(void)
     GPIO_Init(ENCODER_PORT, &GPIO_InitStructure);
     
     tim_init();
-    exti_init();
 }
 
 /******************************************************************************/

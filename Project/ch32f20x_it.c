@@ -149,11 +149,22 @@ void DEBUG_USART_IRQHandler(void)
 	}	 
 }
 
-void EXTI_IRQHandler(void)
+extern uint8_t g_mpu_int;
+void EXTI_MPU_INT_IRQHandler(void)
+{
+	if (EXTI_GetITStatus(EXTI_MPU_INT_LINE) != RESET) 
+	{
+        g_mpu_int = 1;
+        
+		EXTI_ClearITPendingBit(EXTI_MPU_INT_LINE);     
+	}
+}
+
+void EXTI_MOTOR_L_IRQHandler(void)
 {
     encoder_dir_e dir;
 
-	if (EXTI_GetITStatus(EXTI_LINE) != RESET) 
+	if (EXTI_GetITStatus(EXTI_MOTOR_L_LINE) != RESET) 
 	{
         dir = encoder_dir_get();
         
@@ -162,7 +173,7 @@ void EXTI_IRQHandler(void)
         else
             encoder_cnt_inc(-1);
         
-		EXTI_ClearITPendingBit(EXTI_LINE);     
+		EXTI_ClearITPendingBit(EXTI_MOTOR_L_LINE);     
 	}
 }
 

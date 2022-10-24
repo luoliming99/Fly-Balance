@@ -4,7 +4,7 @@
 #include "ch32f20x.h"
 
 #define ENCODER_PORT    GPIOA   
-#define ENCODER_PIN     GPIO_Pin_10
+#define ENCODER_PIN     GPIO_Pin_12
 
 typedef enum
 {
