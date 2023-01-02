@@ -24,9 +24,9 @@ static void __tim_mode_config(void)
 
     /* 
      * ÖÐ¶ÏÆµÂÊ = 144M / (TIM_Prescaler + 1) / (TIM_Period + 1)
-     *          = 500Hz
+     *          = 1000Hz
      */
-	TIM_TimeBaseStructure.TIM_Period = 2000-1;
+	TIM_TimeBaseStructure.TIM_Period = 1000-1;
 	TIM_TimeBaseStructure.TIM_Prescaler = 144-1;
 	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
 	TIM_TimeBaseInit(TIM_x, &TIM_TimeBaseStructure);

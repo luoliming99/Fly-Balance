@@ -10,7 +10,6 @@
 #include "ch32f20x_it.h"
 #include "bsp_uart.h"
 #include "bsp_systick.h"
-#include "bsp_exti.h"
 #include "bsp_tim.h"
 
 /*********************************************************************
@@ -148,23 +147,32 @@ void DEBUG_USART_IRQHandler(void)
 	}	 
 }
 
-extern uint8_t g_mpu_int;
-void EXTI_MPU_INT_IRQHandler(void)
-{
-	if (EXTI_GetITStatus(EXTI_MPU_INT_LINE) != RESET) 
-	{
-        g_mpu_int = 1;
-        
-		EXTI_ClearITPendingBit(EXTI_MPU_INT_LINE);     
-	}
-}
+uint8_t g_2ms_flag = 0;
+uint8_t g_5ms_flag = 0;
+uint8_t g_10ms_flag = 0;
 
-extern uint8_t g_2ms_flag;
 void  TIM_IRQHandler(void)
 {
+    static uint32_t cnt = 0;
 	if (TIM_GetITStatus(TIM_x, TIM_IT_Update) != RESET) 
 	{	
-        g_2ms_flag = 1;
+        if ((cnt % 2) == 0)
+        {
+            g_2ms_flag = 1;
+        }
+        if ((cnt % 5) == 0)
+        {
+            g_5ms_flag = 1;
+        } 
+        if ((cnt % 10) == 0)
+        {
+            g_10ms_flag = 1;
+        } 
+        cnt++;
+        if (cnt == 1000000)
+        {
+            cnt = 0;
+        }
 
 		TIM_ClearITPendingBit(TIM_x , TIM_FLAG_Update);  		 
 	}		 	

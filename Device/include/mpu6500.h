@@ -21,6 +21,7 @@ typedef int (*pfn_i2c_write) (uint8_t slave_addr,
 #define MPU_REG_CONFIG          0x1A
 #define MPU_REG_GYRO_CONFIG     0x1B
 #define MPU_REG_ACCEL_CONFIG    0x1C
+#define MPU_REG_ACCEL_CONFIG_2  0x1D
 #define MPU_REG_ACCEL_XOUT_H    0x3B
 #define MPU_REG_TEMP_OUT_H		0X41
 #define MPU_REG_WHO_AM_I        0x75
@@ -45,11 +46,13 @@ typedef struct
 } mpu_result_t;
 
 
-int mpu6500_init(pfn_i2c_read read, pfn_i2c_write write);
-int mpu6500_read_raw_data(mpu_result_t *p_data);
+int mpu_init(pfn_i2c_read read, pfn_i2c_write write);
+void mpu_read_raw_data(mpu_result_t *p_data);
+void mpu_raw_data_calibration(mpu_result_t *p_data);
 
-int mpu_dmp_init(void);
-int mpu_dmp_get_data(mpu_result_t *p_data);
+void imu_update(mpu_result_t *p_data);
+void get_euler_angle(mpu_result_t *p_data);
+
 
 #endif
 
