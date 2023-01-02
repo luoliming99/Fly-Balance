@@ -11,6 +11,7 @@
 #include "bsp_uart.h"
 #include "bsp_systick.h"
 #include "bsp_exti.h"
+#include "bsp_tim.h"
 
 /*********************************************************************
  * @fn      NMI_Handler
@@ -156,6 +157,17 @@ void EXTI_MPU_INT_IRQHandler(void)
         
 		EXTI_ClearITPendingBit(EXTI_MPU_INT_LINE);     
 	}
+}
+
+extern uint8_t g_2ms_flag;
+void  TIM_IRQHandler(void)
+{
+	if (TIM_GetITStatus(TIM_x, TIM_IT_Update) != RESET) 
+	{	
+        g_2ms_flag = 1;
+
+		TIM_ClearITPendingBit(TIM_x , TIM_FLAG_Update);  		 
+	}		 	
 }
 
 

@@ -447,6 +447,11 @@
               <FileType>1</FileType>
               <FilePath>..\Algorithm\source\pid.c</FilePath>
             </File>
+            <File>
+              <FileName>filter.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Algorithm\source\filter.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -481,6 +486,16 @@
               <FileName>bsp_exti.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\BSP\source\bsp_exti.c</FilePath>
+            </File>
+            <File>
+              <FileName>bsp_adc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\BSP\source\bsp_adc.c</FilePath>
+            </File>
+            <File>
+              <FileName>bsp_tim.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\BSP\source\bsp_tim.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -551,6 +566,11 @@
               <FileName>ch32f20x_exti.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\SRC\StdPeriphDriver\src\ch32f20x_exti.c</FilePath>
+            </File>
+            <File>
+              <FileName>ch32f20x_dma.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\SRC\StdPeriphDriver\src\ch32f20x_dma.c</FilePath>
             </File>
           </Files>
         </Group>

@@ -41,10 +41,10 @@ int mpu6500_init(pfn_i2c_read read, pfn_i2c_write write)
     regval = 0x03;  /* 退出Sleep模式，配置陀螺仪时钟源为z轴时钟PLL */
     i2c_write(MPU6500_I2C_ADDR, MPU_REG_PWR_MGMT_1, 1, &regval);
     
-    regval = 0x07;  /* 配置采样频率分频器,div=8,fsamp=fout/div=125Hz */
+    regval = 0x01;  /* 配置采样频率分频器,div=2,fout=fsamp/div=500Hz */
 	i2c_write(MPU6500_I2C_ADDR, MPU_REG_SMPLRT_DIV, 1, &regval);
     
-    regval = 0x03;  /* 配置低通数字滤波器，bandWidth=44Hz,fout=1kHz */
+    regval = 0x03;  /* 配置低通数字滤波器，bandWidth=44Hz,fsamp=1kHz */
     i2c_write(MPU6500_I2C_ADDR, MPU_REG_CONFIG, 1, &regval);
     
     regval = 0x18;  /* 配置角速度计满量程范围为±2000°/S */
@@ -92,8 +92,8 @@ int mpu6500_read_raw_data(mpu_result_t *p_data)
  * boards at Invensense. If needed, please modify the matrices to match the
  * chip-to-body matrix for your particular set up.
  */
-static signed char __gyro_orientation[9] = {-1, 0, 0,
-                                            0, -1, 0,
+static signed char __gyro_orientation[9] = {1, 0, 0,
+                                            0, 1, 0,
                                             0, 0, 1};
 
 static unsigned short __inv_row_2_scale(const signed char *row)
