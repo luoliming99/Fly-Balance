@@ -182,7 +182,9 @@ void imu_update(mpu_result_t *p_data)
     static float ex_int = 0, ey_int = 0, ez_int = 0;
     
     /* 加速度计的三维向量转成单位向量 */
-    norm = _fast_inv_sqrt((float)p_data->accel_xout * p_data->accel_xout + p_data->accel_yout * p_data->accel_yout + p_data->accel_zout * p_data->accel_zout);
+    norm = _fast_inv_sqrt((float)p_data->accel_xout * p_data->accel_xout + 
+                          (float)p_data->accel_yout * p_data->accel_yout + 
+                          (float)p_data->accel_zout * p_data->accel_zout);
     ax = p_data->accel_xout * norm;
     ay = p_data->accel_yout * norm;
     az = p_data->accel_zout * norm;

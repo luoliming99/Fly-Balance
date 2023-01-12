@@ -150,6 +150,7 @@ void DEBUG_USART_IRQHandler(void)
 uint8_t g_2ms_flag = 0;
 uint8_t g_5ms_flag = 0;
 uint8_t g_10ms_flag = 0;
+uint8_t g_200ms_flag = 0;
 
 void  TIM_IRQHandler(void)
 {
@@ -168,6 +169,10 @@ void  TIM_IRQHandler(void)
         {
             g_10ms_flag = 1;
         } 
+        if ((cnt % 200) == 0)
+        {
+            g_200ms_flag = 1;
+        }
         cnt++;
         if (cnt == 1000000)
         {

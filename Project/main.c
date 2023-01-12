@@ -18,6 +18,7 @@
 extern uint8_t g_2ms_flag;
 extern uint8_t g_5ms_flag;
 extern uint8_t g_10ms_flag;
+extern uint8_t g_200ms_flag;
 
 typedef enum
 {
@@ -25,6 +26,13 @@ typedef enum
     UNLOCK_MAX_ACC,
     UNLOCK_SUCCESS
 } unlock_state_e;
+
+typedef enum
+{
+    NO_KEY_PRESS = 0,
+    KEY_L_PRESS,
+    KEY_R_PRESS,
+} key_status_e;
 
 static unlock_state_e _unlock_state = UNLOCK_INIT;
 
@@ -53,9 +61,13 @@ int main( void )
     
     int16_t     motor_pwm[4] = {0};
     
-    uint16_t accelerator  = 0;
-    int16_t  pitch_target = 0;
-    int16_t  roll_target  = 0;
+    uint16_t accelerator  = 0;  /* 30 ~ 900 */
+    int16_t  pitch_target = 0;  /* -30бу ~ 30бу */
+    int16_t  yaw_target   = 0;  /* -180бу ~ 180бу */
+    int16_t  roll_target  = 0;  /* -30бу ~ 30бу */
+    
+    key_status_e  key_val = NO_KEY_PRESS;
+    float rudder_val = 180.0;   /* ┤Є╢ц╓╡(0бу ~ 360бу) */
 
     
     NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
@@ -83,6 +95,12 @@ int main( void )
     ret = nrf24l01_init();
     printf("nrf24l01_init %d\r\n", ret);
     nrf24l01_rx_mode();
+    
+    motor_pwm[MOTOR_LF] = 1000;
+    motor_pwm[MOTOR_RF] = 0;
+    motor_pwm[MOTOR_LB] = 1000;
+    motor_pwm[MOTOR_RB] = 0;
+    motor_driver_all(motor_pwm);
                 
     while (1)
     {
@@ -126,7 +144,7 @@ int main( void )
                 yaw_angle_pid.kp = 10;
                 yaw_angle_pid.ki = 0;
                 yaw_angle_pid.kd = 0;
-                pid_postion_cal(&yaw_angle_pid, 0, mpu_data.yaw);
+                pid_postion_cal(&yaw_angle_pid, yaw_target, mpu_data.yaw);
 
                 pitch_rate_pid.kp = 3;
                 pitch_rate_pid.ki = 0;
@@ -155,8 +173,10 @@ int main( void )
             if (ret == 0)
             {   
                 accelerator  = *(uint16_t *)&nrf_buf[0];
-                pitch_target = *(int16_t *)&nrf_buf[2]; 
+                pitch_target = *(int16_t *)&nrf_buf[2];
                 roll_target  = *(int16_t *)&nrf_buf[4];
+                key_val  = (key_status_e)*(uint8_t *)&nrf_buf[6];
+//                printf("%d %d %d %d\r\n", accelerator, pitch_target, roll_target, key_val);
                 
                 if (_unlock_state != UNLOCK_SUCCESS)
                 {
@@ -188,12 +208,39 @@ int main( void )
                     {
                         accelerator = 0;
                     }
+                    switch (key_val)
+                    {
+                        case KEY_L_PRESS: 
+                            rudder_val -= 0.2;
+                            if (rudder_val <= 0.0)
+                            {
+                                rudder_val = 360;
+                            }
+                        break;
+                        case KEY_R_PRESS:
+                            rudder_val += 0.2;
+                            if (rudder_val >= 360.0)
+                            {
+                                rudder_val = 0;
+                            }
+                        break;
+                        default: break;
+                    }
+                    yaw_target = 180 - rudder_val;
+//                    printf("%d\r\n", yaw_target);
                 }
             }
-            
+        }
+        if (1 == g_200ms_flag)
+        {
+            g_200ms_flag = 0;
             float batt_last = (float)g_adc_val[0] / 4095 * 3.3 * 1.36;
             batt_volt = batt_aver_filter(batt_last);
-            printf("%.2f\r\n", batt_volt);
+//            printf("%.2f\r\n", batt_volt);
+            if (batt_volt < 2.6)
+            {
+                led_set(LED_LB, TOGGLE);
+            }
         }
     }
 }
