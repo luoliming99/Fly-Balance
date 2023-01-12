@@ -1,9 +1,19 @@
 #include "motor.h"
 #include "bsp_pwm.h"
 
+#define __MOTOR_STOP_MAX_VAL    50      /* 电机静止上限值 */
+#define __MOTOR_STAT_MIN_VAL    650     /* 电机转动下限值 */
+
 /******************************************************************************/
 void motor_driver(which_motor_e motor, int16_t pwm)
 {
+    /* 根据电机特性，对PWM占空比做转换 */
+    if (pwm < -__MOTOR_STOP_MAX_VAL) {
+        pwm -= __MOTOR_STAT_MIN_VAL + __MOTOR_STOP_MAX_VAL;
+    } else if (pwm > __MOTOR_STOP_MAX_VAL) {
+        pwm += __MOTOR_STAT_MIN_VAL - __MOTOR_STOP_MAX_VAL;
+    }
+
     if (pwm < -1000)
     {
         pwm = -1000;
@@ -16,8 +26,8 @@ void motor_driver(which_motor_e motor, int16_t pwm)
     {
         switch (motor)
         {
-            case MOTOR_L: PWM_CH1_SET(pwm); PWM_CH2_SET(0); break;
-            case MOTOR_R: PWM_CH4_SET(pwm); PWM_CH3_SET(0); break;
+            case MOTOR_L: PWM_CH1_SET(0); PWM_CH2_SET(pwm); break;
+            case MOTOR_R: PWM_CH4_SET(0); PWM_CH3_SET(pwm); break;
             default: break;
         }
     }
@@ -25,8 +35,8 @@ void motor_driver(which_motor_e motor, int16_t pwm)
     {
         switch (motor)
         {
-            case MOTOR_L: PWM_CH1_SET(0); PWM_CH2_SET(-pwm); break;
-            case MOTOR_R: PWM_CH4_SET(0); PWM_CH3_SET(-pwm); break;
+            case MOTOR_L: PWM_CH1_SET(-pwm); PWM_CH2_SET(0); break;
+            case MOTOR_R: PWM_CH4_SET(-pwm); PWM_CH3_SET(0); break;
             default: break;
         }
     }

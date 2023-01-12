@@ -24,10 +24,10 @@ static void __pulse_counter_mode_config(void)
 
     /* 
      * ÖÐ¶ÏÆµÂÊ = 144M / (TIM_Prescaler + 1) / (TIM_Period + 1)
-     *          = 1Hz
+     *          = 100Hz
      */
-	TIM_TimeBaseStructure.TIM_Period = 9999;
-	TIM_TimeBaseStructure.TIM_Prescaler = 14399;
+	TIM_TimeBaseStructure.TIM_Period = 100-1;
+	TIM_TimeBaseStructure.TIM_Prescaler = 14400-1;
 	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
 	TIM_TimeBaseInit(TIM_x, &TIM_TimeBaseStructure);
 

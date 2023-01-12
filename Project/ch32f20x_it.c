@@ -13,6 +13,7 @@
 #include "bsp_tim.h"
 #include "bsp_exti.h"
 #include "encoder.h"
+#include "led.h"
 
 /*********************************************************************
  * @fn      NMI_Handler
@@ -166,14 +167,31 @@ void EXTI_MOTOR_L_IRQHandler(void)
 
 	if (EXTI_GetITStatus(EXTI_MOTOR_L_LINE) != RESET) 
 	{
-        dir = encoder_dir_get();
+        dir = encoder_l_dir_get();
         
         if (dir == DIR_POS)
-            encoder_cnt_inc(1);
+            encoder_l_cnt_inc(1);
         else
-            encoder_cnt_inc(-1);
+            encoder_l_cnt_inc(-1);
         
 		EXTI_ClearITPendingBit(EXTI_MOTOR_L_LINE);     
+	}
+}
+
+void EXTI_MOTOR_R_IRQHandler(void)
+{
+    encoder_dir_e dir;
+
+	if (EXTI_GetITStatus(EXTI_MOTOR_R_LINE) != RESET) 
+	{
+        dir = encoder_r_dir_get();
+        
+        if (dir == DIR_POS)
+            encoder_r_cnt_inc(1);
+        else
+            encoder_r_cnt_inc(-1);
+        
+		EXTI_ClearITPendingBit(EXTI_MOTOR_R_LINE);     
 	}
 }
 
@@ -181,9 +199,12 @@ void  TIM_IRQHandler(void)
 {
 	if (TIM_GetITStatus(TIM_x, TIM_IT_Update) != RESET) 
 	{	
-        encoder_speed_calc();
-        encoder_cnt_clr();
-        printf("speed=%d (r/min)\r\n", encoder_speed_get());
+        encoder_l_speed_calc();
+        encoder_r_speed_calc();
+        encoder_l_cnt_clr();
+        encoder_r_cnt_clr();
+        
+//        printf("l=%d r=%d\r\n", encoder_l_speed_get(), encoder_r_speed_get());
 
 		TIM_ClearITPendingBit(TIM_x , TIM_FLAG_Update);  		 
 	}		 	

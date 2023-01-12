@@ -7,7 +7,7 @@
 #define LED_LF_PIN  GPIO_Pin_4
 #define LED_RF_PIN  GPIO_Pin_5
 #define LED_LB_PIN  GPIO_Pin_6
-#define LED_RB_PIN  GPIO_Pin_7
+#define LED_RB_PIN  GPIO_Pin_8
 
 typedef enum
 {

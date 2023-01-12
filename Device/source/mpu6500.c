@@ -208,7 +208,7 @@ int mpu_dmp_init(void)
             DMP_FEATURE_GYRO_CAL);  /* 设置DMP功能 */
     if (ret) return -6; 
     
-    ret = dmp_set_fifo_rate(200);	/* 设置DMP输出速率(最大不超过200Hz) */
+    ret = dmp_set_fifo_rate(100);	/* 设置DMP输出速率(最大不超过200Hz) */
     if (ret) return -7; 
 
     ret = __mpu_run_self_test();    /* 自检 */

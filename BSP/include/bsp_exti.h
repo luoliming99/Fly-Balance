@@ -25,6 +25,14 @@
 #define EXTI_MOTOR_L_IRQ            EXTI15_10_IRQn
 #define EXTI_MOTOR_L_IRQHandler     EXTI15_10_IRQHandler
 
+#define EXTI_MOTOR_R_PORT           GPIOB
+#define EXTI_MOTOR_R_PIN            GPIO_Pin_3
+#define EXTI_MOTOR_R_PORTSOURCE     GPIO_PortSourceGPIOB 
+#define EXTI_MOTOR_R_PINSOURCE      GPIO_PinSource3
+#define EXTI_MOTOR_R_LINE           EXTI_Line3
+#define EXTI_MOTOR_R_IRQ            EXTI3_IRQn
+#define EXTI_MOTOR_R_IRQHandler     EXTI3_IRQHandler
+
 
 void exti_init(void);
 
