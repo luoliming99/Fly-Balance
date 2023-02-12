@@ -1,17 +1,16 @@
 #include "motor.h"
 #include "bsp_pwm.h"
 
-#define __MOTOR_STOP_MAX_VAL    50      /* 电机静止上限值 */
-#define __MOTOR_STAT_MIN_VAL    650     /* 电机转动下限值 */
+#define __MOTOR_STAT_MIN_VAL    700     /* 电机转动下限值 */
 
 /******************************************************************************/
 void motor_driver(which_motor_e motor, int16_t pwm)
 {
     /* 根据电机特性，对PWM占空比做转换 */
-    if (pwm < -__MOTOR_STOP_MAX_VAL) {
-        pwm -= __MOTOR_STAT_MIN_VAL + __MOTOR_STOP_MAX_VAL;
-    } else if (pwm > __MOTOR_STOP_MAX_VAL) {
-        pwm += __MOTOR_STAT_MIN_VAL - __MOTOR_STOP_MAX_VAL;
+    if (pwm < 0) {
+        pwm -= __MOTOR_STAT_MIN_VAL;
+    } else if (pwm > 0) {
+        pwm += __MOTOR_STAT_MIN_VAL;
     }
 
     if (pwm < -1000)

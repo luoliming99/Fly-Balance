@@ -13,6 +13,6 @@
  */
 void niming_report_imu(mpu_result_t *p_data); 
 
-void niming_report_data(mpu_result_t *p_data);
+void niming_report_data(mpu_result_t *p_data, float speed);
 
 #endif

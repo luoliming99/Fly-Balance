@@ -11,7 +11,6 @@
 #include "bsp_uart.h"
 #include "bsp_systick.h"
 #include "bsp_tim.h"
-#include "bsp_exti.h"
 #include "encoder.h"
 #include "led.h"
 
@@ -127,16 +126,39 @@ void PendSV_Handler(void)
   }
 }
 
-/*********************************************************************
- * @fn      SysTick_Handler
- *
- * @brief   This function handles SysTick Handler.
- *
- * @return  none
- */
+uint8_t g_2ms_flag = 0;
+uint8_t g_5ms_flag = 0;
+uint8_t g_20ms_flag = 0;
+uint8_t g_200ms_flag = 0;
+
 void SysTick_Handler(void)
 {
-  g_systick_cnt++;
+    if ((g_systick_cnt % 2) == 0)
+    {
+        g_2ms_flag = 1;
+    }
+    if ((g_systick_cnt % 5) == 0)
+    {   
+        g_5ms_flag = 1;
+    } 
+    if ((g_systick_cnt % 20) == 0)
+    {
+        encoder_l_cnt_get();
+        encoder_r_cnt_get();
+        encoder_l_cnt_clr();
+        encoder_r_cnt_clr();
+        
+        g_20ms_flag = 1;
+    }
+    if ((g_systick_cnt % 200) == 0)
+    {
+        g_200ms_flag = 1;
+    }
+    g_systick_cnt++;
+    if (g_systick_cnt == 1000000)
+    {
+        g_systick_cnt = 0;
+    }
 }
 
 void DEBUG_USART_IRQHandler(void) 
@@ -150,63 +172,39 @@ void DEBUG_USART_IRQHandler(void)
 	}	 
 }
 
-extern uint8_t g_mpu_int;
-void EXTI_MPU_INT_IRQHandler(void)
-{
-	if (EXTI_GetITStatus(EXTI_MPU_INT_LINE) != RESET) 
-	{
-        g_mpu_int = 1;
-        
-		EXTI_ClearITPendingBit(EXTI_MPU_INT_LINE);     
-	}
-}
-
-void EXTI_MOTOR_L_IRQHandler(void)
-{
-    encoder_dir_e dir;
-
-	if (EXTI_GetITStatus(EXTI_MOTOR_L_LINE) != RESET) 
-	{
-        dir = encoder_l_dir_get();
-        
-        if (dir == DIR_POS)
-            encoder_l_cnt_inc(1);
-        else
-            encoder_l_cnt_inc(-1);
-        
-		EXTI_ClearITPendingBit(EXTI_MOTOR_L_LINE);     
-	}
-}
-
-void EXTI_MOTOR_R_IRQHandler(void)
-{
-    encoder_dir_e dir;
-
-	if (EXTI_GetITStatus(EXTI_MOTOR_R_LINE) != RESET) 
-	{
-        dir = encoder_r_dir_get();
-        
-        if (dir == DIR_POS)
-            encoder_r_cnt_inc(1);
-        else
-            encoder_r_cnt_inc(-1);
-        
-		EXTI_ClearITPendingBit(EXTI_MOTOR_R_LINE);     
-	}
-}
-
 void  TIM_IRQHandler(void)
 {
-	if (TIM_GetITStatus(TIM_x, TIM_IT_Update) != RESET) 
-	{	
-        encoder_l_speed_calc();
-        encoder_r_speed_calc();
-        encoder_l_cnt_clr();
-        encoder_r_cnt_clr();
-        
-//        printf("l=%d r=%d\r\n", encoder_l_speed_get(), encoder_r_speed_get());
+    static uint32_t cnt = 0;
+    if (TIM_GetITStatus(TIM_x, TIM_IT_Update) != RESET) 
+    {	
+        if ((cnt % 2) == 0)
+        {
+            g_2ms_flag = 1;
+        }
+        if ((cnt % 5) == 0)
+        {   
+            g_5ms_flag = 1;
+        } 
+        if ((cnt % 20) == 0)
+        {
+            encoder_l_cnt_get();
+            encoder_r_cnt_get();
+            encoder_l_cnt_clr();
+            encoder_r_cnt_clr();
+            
+            g_20ms_flag = 1;
+        }
+        if ((cnt % 200) == 0)
+        {
+            g_200ms_flag = 1;
+        }
+        cnt++;
+        if (cnt == 1000000)
+        {
+            cnt = 0;
+        }
 
-		TIM_ClearITPendingBit(TIM_x , TIM_FLAG_Update);  		 
-	}		 	
+        TIM_ClearITPendingBit(TIM_x , TIM_FLAG_Update);  		 
+    }	 	
 }
 

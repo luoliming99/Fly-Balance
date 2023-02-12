@@ -13,16 +13,16 @@
 #define ADC_CLK             RCC_APB2Periph_ADC1
 
 #define ADC_GPIO_CLK_CMD    RCC_APB2PeriphClockCmd
-#define ADC_GPIO_CLK        RCC_APB2Periph_GPIOA
+#define ADC_GPIO_CLK        RCC_APB2Periph_GPIOB
 
 #define ADC_DMA_CLK_CMD     RCC_AHBPeriphClockCmd
 #define ADC_DMA_CLK         RCC_AHBPeriph_DMA1
 
 /* GPIO≈‰÷√ */
-#define ADC_PORT    GPIOA
+#define ADC_PORT    GPIOB
 
-#define ADC_PIN1    GPIO_Pin_7
-#define ADC_CH1     ADC_Channel_7
+#define ADC_PIN1    GPIO_Pin_1
+#define ADC_CH1     ADC_Channel_9
 
 /* DMA≈‰÷√ */
 #define ADC_DMA_CH  DMA1_Channel1
@@ -32,5 +32,6 @@
 extern uint16_t g_adc_val[];
 
 void adc_init(void);
+float get_batt_volt(void);
     
 #endif

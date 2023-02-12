@@ -1,6 +1,6 @@
 #include "bsp_tim.h"
 
-static void __tim_nvic_config(void)
+static void __nvic_config(void)
 {
     NVIC_InitTypeDef NVIC_InitStructure = {0};
 
@@ -16,18 +16,18 @@ static void __tim_nvic_config(void)
     NVIC_Init(&NVIC_InitStructure);
 }
 
-static void __pulse_counter_mode_config(void)
+static void __tim_mode_config(void)
 {
-    TIM_TimeBaseInitTypeDef  TIM_TimeBaseStructure = {0};
+    TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure = {0};
     
     TIM_CLK_CMD(TIM_CLK, ENABLE);
 
     /* 
      * ÖÐ¶ÏÆµÂÊ = 144M / (TIM_Prescaler + 1) / (TIM_Period + 1)
-     *          = 100Hz
+     *          = 1000Hz
      */
-	TIM_TimeBaseStructure.TIM_Period = 100-1;
-	TIM_TimeBaseStructure.TIM_Prescaler = 14400-1;
+	TIM_TimeBaseStructure.TIM_Period = 1000-1;
+	TIM_TimeBaseStructure.TIM_Prescaler = 144-1;
 	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
 	TIM_TimeBaseInit(TIM_x, &TIM_TimeBaseStructure);
 
@@ -40,6 +40,6 @@ static void __pulse_counter_mode_config(void)
 /******************************************************************************/
 void tim_init(void)
 {
-    __tim_nvic_config();
-    __pulse_counter_mode_config(); 
+    __nvic_config();
+    __tim_mode_config(); 
 }

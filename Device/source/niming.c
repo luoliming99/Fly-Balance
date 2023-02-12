@@ -76,9 +76,9 @@ void niming_report_imu(mpu_result_t *p_data)
 }
 
 /******************************************************************************/
-void niming_report_data(mpu_result_t *p_data)
+void niming_report_data(mpu_result_t *p_data, float speed)
 {
-	uint8_t buf[18] = {0};
+	uint8_t buf[20] = {0};
     
     buf[0] = p_data->accel_xout >> 8;
     buf[1] = p_data->accel_xout;
@@ -107,5 +107,8 @@ void niming_report_data(mpu_result_t *p_data)
     buf[16] = (int16_t)(p_data->yaw * 10) >> 8;
     buf[17] = (int16_t)(p_data->yaw * 10);
     
-	__niming_report(0XA1, buf, 18);    /* 观察波形：0xA1 */
+    buf[18] = (int16_t)(speed * 100) >> 8;  /* 平衡车速度 */
+    buf[19] = (int16_t)(speed * 100);
+    
+	__niming_report(0XA1, buf, 20);    /* 观察波形：0xA1 */
 }

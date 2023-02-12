@@ -29,10 +29,10 @@ static void __pwm_mode_config(void)
 
     /* 
      * PWMÆµÂÊ = 144M / (TIM_Prescaler + 1) / (TIM_Period + 1)
-     *         = 2kHz
+     *         = 16kHz
      */
 	TIM_TimeBaseStructure.TIM_Period = 999;
-	TIM_TimeBaseStructure.TIM_Prescaler = 71;
+	TIM_TimeBaseStructure.TIM_Prescaler = 8;
 	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
 	TIM_TimeBaseInit(PWM_TIM_x, &TIM_TimeBaseStructure);
     
