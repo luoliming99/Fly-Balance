@@ -4,7 +4,9 @@ static void __i2c_gpio_config(void)
 {
     GPIO_InitTypeDef  GPIO_InitStructure = {0};
     
-    I2C_GPIO_CLK_CMD(I2C_GPIO_CLK, ENABLE);     /* 使能GPIO时钟 */
+    I2C_GPIO_CLK_CMD(I2C_GPIO_CLK, ENABLE);         /* 使能GPIO时钟和复用功能时钟 */
+    
+    GPIO_PinRemapConfig(GPIO_Remap_I2C1, ENABLE);   /* 使能端口重映射 */
 
     GPIO_InitStructure.GPIO_Pin = I2C_SCL_PIN;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;

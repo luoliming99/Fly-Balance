@@ -124,16 +124,34 @@ void PendSV_Handler(void)
   }
 }
 
-/*********************************************************************
- * @fn      SysTick_Handler
- *
- * @brief   This function handles SysTick Handler.
- *
- * @return  none
- */
+uint8_t g_2ms_flag = 0;
+uint8_t g_5ms_flag = 0;
+uint8_t g_10ms_flag = 0;
+uint8_t g_200ms_flag = 0;
+
 void SysTick_Handler(void)
 {
-  g_systick_cnt++;
+    if ((g_systick_cnt % 2) == 0)
+    {
+        g_2ms_flag = 1;
+    }
+    if ((g_systick_cnt % 5) == 0)
+    {
+        g_5ms_flag = 1;
+    } 
+    if ((g_systick_cnt % 10) == 0)
+    {
+        g_10ms_flag = 1;
+    } 
+    if ((g_systick_cnt % 200) == 0)
+    {
+        g_200ms_flag = 1;
+    } 
+    g_systick_cnt++;
+    if (g_systick_cnt == 1000000)
+    {
+        g_systick_cnt = 0;
+    }
 }
 
 void DEBUG_USART_IRQHandler(void) 
@@ -146,11 +164,6 @@ void DEBUG_USART_IRQHandler(void)
         USART_SendData(DEBUG_USART, ch);    
 	}	 
 }
-
-uint8_t g_2ms_flag = 0;
-uint8_t g_5ms_flag = 0;
-uint8_t g_10ms_flag = 0;
-uint8_t g_200ms_flag = 0;
 
 void  TIM_IRQHandler(void)
 {

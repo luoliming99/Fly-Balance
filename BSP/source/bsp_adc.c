@@ -1,8 +1,17 @@
 #include "bsp_adc.h"
 
-uint16_t g_adc_val[ADC_CH_NUM] = {0};
 
-static void __adc_gpio_config(void)
+uint16_t g_adc_val[ADC_CH_NUM] = {0};
+static int16_t _conversion_val = 0;
+
+static uint16_t _get_conversion_val(uint16_t raw_val)
+{
+    if ((raw_val + _conversion_val) < 0) return 0;
+	if ((raw_val + _conversion_val) > 4095) return 4095;
+	return (raw_val + _conversion_val);
+}
+
+static void _adc_gpio_config(void)
 {
     GPIO_InitTypeDef GPIO_InitStructure;
 
@@ -14,7 +23,7 @@ static void __adc_gpio_config(void)
     GPIO_Init(ADC_PORT, &GPIO_InitStructure);
 }
 
-static void __adc_mode_config(void)
+static void _adc_mode_config(void)
 {
     DMA_InitTypeDef DMA_InitStructure = {0};    /* 这里不初始化为0，且后面不赋值DMA_InitStructure.DMA_Priority会出问题！ */
 	ADC_InitTypeDef ADC_InitStructure = {0};
@@ -68,6 +77,7 @@ static void __adc_mode_config(void)
 	while(ADC_GetResetCalibrationStatus(ADC_x));    /* 等待校准寄存器初始化完成 */
     ADC_StartCalibration(ADC_x);                    /* ADC开始校准 */
     while(ADC_GetCalibrationStatus(ADC_x));         /* 等待校准完成 */
+    _conversion_val = Get_CalibrationValue(ADC_x);	/* 获取校准值 */
      
 	ADC_SoftwareStartConvCmd(ADC_x, ENABLE);        /* 软件触发ADC转换 */
 }
@@ -75,6 +85,13 @@ static void __adc_mode_config(void)
 /******************************************************************************/
 void adc_init(void)
 {
-    __adc_gpio_config();
-    __adc_mode_config(); 
+    _adc_gpio_config();
+    _adc_mode_config(); 
+}
+
+/******************************************************************************/
+float get_batt_volt(void)
+{
+    uint16_t adc_val = _get_conversion_val(g_adc_val[0]);
+    return (float)adc_val / 4095 * 3.3 * 1.36;
 }

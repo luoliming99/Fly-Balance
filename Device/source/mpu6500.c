@@ -99,7 +99,7 @@ int mpu_init(pfn_i2c_read read, pfn_i2c_write write)
     i2c_write(MPU6500_I2C_ADDR, MPU_REG_PWR_MGMT_1, 1, &regval);
     
     regval = 0x01;  /* 配置采样频率分频器,div=2,fout=fsamp/div=500Hz */
-	i2c_write(MPU6500_I2C_ADDR, MPU_REG_SMPLRT_DIV, 1, &regval);
+    i2c_write(MPU6500_I2C_ADDR, MPU_REG_SMPLRT_DIV, 1, &regval);
     
     regval = 0x03;  /* 配置陀螺仪低通数字滤波器，bandWidth=41Hz,fsamp=1kHz */
     i2c_write(MPU6500_I2C_ADDR, MPU_REG_CONFIG, 1, &regval);

@@ -48,8 +48,11 @@ int main( void )
     int ret = 0;
     mpu_result_t mpu_raw_data;      /* mpu原始数据 */
     mpu_result_t mpu_data;          /* 滤波、姿态解算后的数据 */
-    uint8_t nrf_buf[RX_PLOAD_WIDTH];
-    float batt_volt;                /* 电池电压，单位：V */
+    
+    uint8_t nrf_rx_buf[PLOAD_WIDTH_MAX] = {0};
+    uint8_t nrf_tx_buf[PLOAD_WIDTH_MAX] = {0};
+    
+    float batt_volt = 0;            /* 电池电压，单位：V */
 
     pid_param_t pitch_rate_pid;     /* 俯仰角速度环 */
     pid_param_t yaw_rate_pid;       /* 偏航角速度环 */
@@ -62,9 +65,9 @@ int main( void )
     int16_t     motor_pwm[4] = {0};
     
     uint16_t accelerator  = 0;  /* 30 ~ 900 */
-    int16_t  pitch_target = 0;  /* -30° ~ 30° */
-    int16_t  yaw_target   = 0;  /* -180° ~ 180° */
-    int16_t  roll_target  = 0;  /* -30° ~ 30° */
+    int16_t  pitch_target = 0;  /* -30°~ 30° */
+    int16_t  yaw_target   = 0;  /* -180°~ 180° */
+    int16_t  roll_target  = 0;  /* -30°~ 30° */
     
     key_status_e  key_val = NO_KEY_PRESS;
     float rudder_val = 180.0;   /* 打舵值(0° ~ 360°) */
@@ -77,7 +80,7 @@ int main( void )
     i2c_init();
     pwm_init();
     adc_init();
-    tim_init();
+//    tim_init(); /* 大BUG，TIM1与SPI2同时开启冲突，SPI通信不正常 */
     /*
      * SYSCLK = 144 MHz
      * HCLK   = 144 MHz
@@ -95,13 +98,7 @@ int main( void )
     ret = nrf24l01_init();
     printf("nrf24l01_init %d\r\n", ret);
     nrf24l01_rx_mode();
-    
-    motor_pwm[MOTOR_LF] = 1000;
-    motor_pwm[MOTOR_RF] = 0;
-    motor_pwm[MOTOR_LB] = 1000;
-    motor_pwm[MOTOR_RB] = 0;
-    motor_driver_all(motor_pwm);
-                
+            
     while (1)
     {
         if (1 == g_2ms_flag && UNLOCK_SUCCESS == _unlock_state)    /* 400us */
@@ -169,14 +166,22 @@ int main( void )
         if (1 == g_10ms_flag)
         {
             g_10ms_flag = 0;
-            ret = nrf24l01_rx_packet(nrf_buf);  /* 100us */
+              
+            /* 装载要回传给遥控器的数据 */
+            *(uint16_t *)&nrf_tx_buf[0] = (uint16_t)(batt_volt * 100 + 0.5);    /* 电池电量 */
+            *(int16_t *)&nrf_tx_buf[2]  = (int16_t)(mpu_data.pitch + 0.5);      /* 俯仰角 */
+            *(int16_t *)&nrf_tx_buf[4]  = (int16_t)(mpu_data.roll + 0.5);       /* 横滚角 */
+            *(int16_t *)&nrf_tx_buf[6]  = (int16_t)(mpu_data.yaw + 0.5);        /* 偏航角 */
+            
+            ret = nrf24l01_rx_packet_ack_with_payload(nrf_rx_buf, nrf_tx_buf, 8);  /* 100us */
+            
             if (ret == 0)
             {   
-                accelerator  = *(uint16_t *)&nrf_buf[0];
-                pitch_target = *(int16_t *)&nrf_buf[2];
-                roll_target  = *(int16_t *)&nrf_buf[4];
-                key_val  = (key_status_e)*(uint8_t *)&nrf_buf[6];
-//                printf("%d %d %d %d\r\n", accelerator, pitch_target, roll_target, key_val);
+                accelerator  = *(uint16_t *)&nrf_rx_buf[0];
+                pitch_target = *(int16_t *)&nrf_rx_buf[2];
+                roll_target  = *(int16_t *)&nrf_rx_buf[4];
+                key_val  = (key_status_e)*(uint8_t *)&nrf_rx_buf[6];
+                printf("%d %d %d %d\r\n", accelerator, pitch_target, roll_target, key_val);
                 
                 if (_unlock_state != UNLOCK_SUCCESS)
                 {
@@ -236,7 +241,7 @@ int main( void )
             g_200ms_flag = 0;
             float batt_last = (float)g_adc_val[0] / 4095 * 3.3 * 1.36;
             batt_volt = batt_aver_filter(batt_last);
-//            printf("%.2f\r\n", batt_volt);
+            printf("%.2f\r\n", batt_volt);
             if (batt_volt < 2.6)
             {
                 led_set(LED_LB, TOGGLE);

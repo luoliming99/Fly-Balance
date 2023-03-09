@@ -12,7 +12,11 @@
 #define FLUSH_TX        0xE1  //清除TX FIFO寄存器.发射模式下用
 #define FLUSH_RX        0xE2  //清除RX FIFO寄存器.接收模式下用
 #define REUSE_TX_PL     0xE3  //重新使用上一包数据,CE为高,数据包被不断发送.
-#define NOP             0xFF  //空操作,可以用来读状态寄存器	 
+#define NOP             0xFF  //空操作,可以用来读状态寄存器
+
+#define W_ACK_PAYLOAD(P)    (0xA8|(P&0x0F)) //PRX模式装载PAYLOAD并使能P通道
+#define W_TX_PAYLOAD_NO_ACK 0xB0            //PTX模式写NO ACK数据
+
 //SPI(NRF24L01)寄存器地址
 #define CONFIG          0x00  //配置寄存器地址;bit0:1接收模式,0发射模式;bit1:电选择;bit2:CRC模式;bit3:CRC使能;
                               //bit4:中断MAX_RT(达到最大重发次数中断)使能;bit5:中断TX_DS使能;bit6:中断RX_DR使能
@@ -45,12 +49,20 @@
 #define RX_PW_P5        0x16  //接收数据通道5有效数据宽度(1~32字节),设置为0则非法
 #define NRF_FIFO_STATUS 0x17  //FIFO状态寄存器;bit0,RX FIFO寄存器空标志;bit1,RX FIFO满标志;bit2,3,保留
                               //bit4,TX FIFO空标志;bit5,TX FIFO满标志;bit6,1,循环发送上一数据包.0,不循环;
+                              
+//24L01+独有寄存器
+#define DYNPD           0x1C                            
+#define FEATURE         0x1D
+#define R_RX_PL_WID     0x60
 
 //24L01发送接收数据宽度定义
 #define TX_ADR_WIDTH    5   	//5字节的地址宽度
 #define RX_ADR_WIDTH    5   	//5字节的地址宽度
 #define TX_PLOAD_WIDTH  32  	//32字节的用户数据宽度
 #define RX_PLOAD_WIDTH  32  	//32字节的用户数据宽度
+
+#define PLOAD_WIDTH_MIN 1       //payload字节宽度最小值
+#define PLOAD_WIDTH_MAX 32      //payload字节宽度最大值
 
 /* 引脚定义 */ 
 #define NRF24L01_CE_PORT        GPIOB  
@@ -67,7 +79,8 @@
 int nrf24l01_init(void);
 void nrf24l01_tx_mode(void);
 void nrf24l01_rx_mode(void);
-int nrf24l01_tx_packet(uint8_t *p_buf);
+int nrf24l01_tx_packet(uint8_t *p_buf, uint8_t len);
 int nrf24l01_rx_packet(uint8_t *p_buf);
+int nrf24l01_rx_packet_ack_with_payload(uint8_t *rx_buf, uint8_t *tx_buf, uint8_t tx_len);
 
 #endif
