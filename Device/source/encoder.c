@@ -3,10 +3,7 @@
 
 
 static int16_t _g_l_pulse_cnt = 0;
-static int16_t _g_l_speed = 0;
-
 static int16_t _g_r_pulse_cnt = 0;
-static int16_t _g_r_speed = 0;
 
 
 /******************************************************************************/

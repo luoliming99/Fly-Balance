@@ -12,5 +12,6 @@ typedef enum
 
 void motor_driver(which_motor_e motor, int16_t pwm);
 void motor_driver_all(int16_t pwm[4]);
+void motor_brake_all(uint16_t factor);
 
 #endif

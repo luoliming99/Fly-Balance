@@ -3,24 +3,11 @@
 
 #define __MOTOR_STAT_MIN_VAL    700     /* 电机转动下限值 */
 
+static int16_t _real_pwm[MOTOR_NUM] = {0};
+
 /******************************************************************************/
 void motor_driver(which_motor_e motor, int16_t pwm)
 {
-    /* 根据电机特性，对PWM占空比做转换 */
-    if (pwm < 0) {
-        pwm -= __MOTOR_STAT_MIN_VAL;
-    } else if (pwm > 0) {
-        pwm += __MOTOR_STAT_MIN_VAL;
-    }
-
-    if (pwm < -1000)
-    {
-        pwm = -1000;
-    } 
-    else if (pwm > 1000)
-    {
-        pwm = 1000;
-    }
     if (pwm > 0)    /* 正转 */
     {
         switch (motor)
@@ -44,6 +31,48 @@ void motor_driver(which_motor_e motor, int16_t pwm)
 /******************************************************************************/
 void motor_driver_all(int16_t pwm[2])
 {
-    motor_driver(MOTOR_L, pwm[MOTOR_L]);
-    motor_driver(MOTOR_R, pwm[MOTOR_R]);
+    /* 根据电机特性，对PWM占空比做转换 */
+    for (uint8_t i = 0; i < MOTOR_NUM; i++)
+    {
+        if (pwm[i] < 0) {
+            pwm[i] -= __MOTOR_STAT_MIN_VAL;
+        } else if (pwm[i] > 0) {
+            pwm[i] += __MOTOR_STAT_MIN_VAL;
+        }
+
+        if (pwm[i] < -1000)
+        {
+            pwm[i] = -1000;
+        } 
+        else if (pwm[i] > 1000)
+        {
+            pwm[i] = 1000;
+        }
+        
+        _real_pwm[i] = pwm[i];
+        
+        motor_driver((which_motor_e)i, pwm[i]);
+    }
+}
+
+/******************************************************************************/
+void motor_brake_all(uint16_t factor)
+{
+    for (uint8_t i = 0; i < MOTOR_NUM; i++)
+    {
+        if (_real_pwm[i] > factor)
+        {
+            _real_pwm[i] -= factor;
+        }
+        else if (_real_pwm[i] < -factor)
+        {
+            _real_pwm[i] += factor;
+        }
+        else
+        {
+            _real_pwm[i] = 0;
+        }
+        
+        motor_driver((which_motor_e)i, _real_pwm[i]);
+    }
 }
