@@ -44,8 +44,10 @@ int main( void )
     mpu_result_t mpu_data;          /* 滤波、姿态解算后的数据 */
     float angle_measure, speed_measure, speed_after_filter, gyroz_after_filter;
 
-    uint8_t nrf_buf[RX_PLOAD_WIDTH];
-    float batt_volt;                /* 电池电压，单位：V */
+    uint8_t nrf_rx_buf[PLOAD_WIDTH_MAX] = {0};
+    uint8_t nrf_tx_buf[PLOAD_WIDTH_MAX] = {0};
+    
+    float batt_volt = 0;            /* 电池电压，单位：V */
 
     pid_param_t balance_pid;        /* 直立控制环 */
     pid_param_t speed_pid;          /* 速度控制环 */
@@ -82,7 +84,7 @@ int main( void )
     ret = nrf24l01_init();
     printf("nrf24l01_init %d\r\n", ret);
     nrf24l01_rx_mode();
-                
+             
     while (1)
     {
         if (1 == g_2ms_flag)
@@ -119,42 +121,24 @@ int main( void )
                 speed_pid.integral = 0;
                 turn_pid.integral = 0;
                 /* 让电机慢慢减速，谨防骤停导致电源纹波过大 */
-                if (balance_pid.out > 300)
-                {
-                    balance_pid.out -= (balance_pid.out - 300);
-                }
-                else if (balance_pid.out < -300)
-                {
-                    balance_pid.out -= (balance_pid.out + 300);
-                }
-                else if (balance_pid.out > 1)
-                {
-                    balance_pid.out -= 1;
-                }
-                else if (balance_pid.out < -1)
-                {
-                    balance_pid.out += 1;
-                }
-                else
-                {
-                    balance_pid.out = 0;
-                }
-                motor_pwm[MOTOR_L] = -balance_pid.out;
-                motor_pwm[MOTOR_R] = -balance_pid.out;
-                motor_driver_all(motor_pwm);
+                motor_brake_all(1);
+                
+//                motor_pwm[MOTOR_L] = 0;
+//                motor_pwm[MOTOR_R] = 0;
+//                motor_driver_all(motor_pwm);
             }
         }
         if (1 == g_20ms_flag)
         {
             led_set(LED_LB, TOGGLE);
             g_20ms_flag = 0;
-
+ 
             speed_measure = (encoder_l_speed_get() + encoder_r_speed_get()) / 2;
             speed_after_filter = aver_speed_filter(speed_measure);
 
             speed_pid.kp = 0.1;
-            speed_pid.ki = 0.002;
-            speed_pid.limit_integral = 5000;
+            speed_pid.ki = 0.003;
+            speed_pid.limit_integral = 4000;
             speed_control(&speed_pid, speed_target, speed_after_filter);
         
             gyroz_after_filter = aver_gyroz_filter(mpu_data.gyro_zout);
@@ -167,12 +151,17 @@ int main( void )
         if (1 == g_200ms_flag)
         {
             g_200ms_flag = 0;
-            ret = nrf24l01_rx_packet(nrf_buf);  /* 100us */
+            
+            /* 装载要回传给遥控器的数据 */
+            *(uint16_t *)&nrf_tx_buf[0] = (uint16_t)(batt_volt * 100 + 0.5);    /* 电池电量 */
+            *(int16_t *)&nrf_tx_buf[2]  = (int16_t)(speed_after_filter + 0.5);  /* 速度 */
+            
+            ret = nrf24l01_rx_packet_ack_with_payload(nrf_rx_buf, nrf_tx_buf, 4);  /* 100us */
             if (ret == 0)
             {
-                speed_target  = *(int16_t *)&nrf_buf[0];
-                turn_target = *(int16_t *)&nrf_buf[2];
-//                printf("%d %d\r\n", speed_target, turn_target);
+                speed_target  = *(int16_t *)&nrf_rx_buf[0];
+                turn_target = *(int16_t *)&nrf_rx_buf[2];
+                printf("%d %d\r\n", speed_target, turn_target);
                 
                 if (_unlock_state != UNLOCK_SUCCESS)
                 {
@@ -204,7 +193,7 @@ int main( void )
 
             float batt_last = get_batt_volt();
             batt_volt = aver_batt_filter(batt_last);
-            if (batt_volt < 3.0)
+            if (batt_volt < 3.2)
             {
                 led_set(LED_RB, TOGGLE);
             }
