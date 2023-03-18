@@ -23,8 +23,6 @@ void pid_postion_cal(pid_param_t *pid, float target, float measure)
     pid->pre_error = pid->error;
 }
 
-
-
 /******************************************************************************/
 void pid_incremental_cal(pid_param_t *pid, float target, float measure)
 {

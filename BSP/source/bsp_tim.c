@@ -18,7 +18,7 @@ static void __nvic_config(void)
 
 static void __tim_mode_config(void)
 {
-    TIM_TimeBaseInitTypeDef  TIM_TimeBaseStructure = {0};
+    TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure = {0};
     
     TIM_CLK_CMD(TIM_CLK, ENABLE);
 

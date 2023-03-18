@@ -340,7 +340,7 @@
               <MiscControls></MiscControls>
               <Define>MPU6500</Define>
               <Undefine></Undefine>
-              <IncludePath>..\SRC\StdPeriphDriver\inc;..\SRC\CMSIS;..\SRC\Debug;..\Project;..\BSP\include;..\Device\include;..\Algorithm\include</IncludePath>
+              <IncludePath>..\SRC\StdPeriphDriver\inc;..\SRC\CMSIS;..\SRC\Debug;..\Project;..\BSP\include;..\Device\include;..\Algorithm\include;..\Control\include</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -398,6 +398,21 @@
               <FileName>main.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\main.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>control</GroupName>
+          <Files>
+            <File>
+              <FileName>common.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Control\source\common.c</FilePath>
+            </File>
+            <File>
+              <FileName>fly.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Control\source\fly.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -570,5 +585,14 @@
     <components/>
     <files/>
   </RTE>
+
+  <LayerInfo>
+    <Layers>
+      <Layer>
+        <LayName>CH32F20x</LayName>
+        <LayPrjMark>1</LayPrjMark>
+      </Layer>
+    </Layers>
+  </LayerInfo>
 
 </Project>

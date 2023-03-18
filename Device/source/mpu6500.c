@@ -1,5 +1,5 @@
 #include "mpu6500.h"
-#include "ctype.h"
+#include "common.h"
 #include "bsp_systick.h"
 #include "bsp_uart.h"
 #include "led.h"
@@ -185,6 +185,7 @@ void imu_update(mpu_result_t *p_data)
     norm = _fast_inv_sqrt((float)p_data->accel_xout * p_data->accel_xout + 
                           (float)p_data->accel_yout * p_data->accel_yout + 
                           (float)p_data->accel_zout * p_data->accel_zout);
+
     ax = p_data->accel_xout * norm;
     ay = p_data->accel_yout * norm;
     az = p_data->accel_zout * norm;

@@ -7,7 +7,7 @@
 #define I2C_CLK             RCC_APB1Periph_I2C1
 
 #define I2C_GPIO_CLK_CMD    RCC_APB2PeriphClockCmd
-#define I2C_GPIO_CLK        (RCC_APB2Periph_GPIOB | RCC_APB2Periph_AFIO)
+#define I2C_GPIO_CLK        RCC_APB2Periph_GPIOB
 
 #define I2C_x               I2C1    
 #define I2C_SCL_PORT        GPIOB   

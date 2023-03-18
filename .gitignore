@@ -1,0 +1,16 @@
+*.dbgconf 
+*.crf 
+*.d 
+*.o 
+*.dep 
+*.sct 
+*.htm 
+*.hex 
+*.lst 
+*.map 
+*.ini
+*.llm
+*.uvoptx
+*.txt
+*.axf
+*.lnp

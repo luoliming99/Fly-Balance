@@ -1,8 +1,7 @@
 #ifndef __FILTER_H
 #define __FILTER_H
 
-#include "ctype.h"
-#include "mpu6500.h"
+#include "common.h"
 
 #define IIR_SAMP_PERIOD     MPU_READ_DATA_PERIOD    /* 采样周期 */
 #define IIR_CUTOFF_FREQ     10                      /* 截止频率 */        
