@@ -10,9 +10,14 @@
 
 #define BATT_FILTER_NUM     20
 
+#define SPEED_FILTER_NUM    10
+#define GYROZ_FILTER_NUM    10
+
 void acc_iir_filter(mpu_result_t *data_in, mpu_result_t *data_out);
 void gyro_aver_filter(mpu_result_t *data_in, mpu_result_t *data_out);
 void mpu_raw_data_filter(mpu_result_t *data_in, mpu_result_t *data_out);
 float batt_aver_filter(float data_in);
+float aver_speed_filter(float data_in);
+float aver_gyroz_filter(int16_t data_in);
 
 #endif

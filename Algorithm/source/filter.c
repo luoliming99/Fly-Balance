@@ -93,3 +93,71 @@ float batt_aver_filter(float data_in)
     }
     return data_out;
 }
+
+/******************************************************************************/
+float aver_speed_filter(float data_in)
+{
+    static float buf[SPEED_FILTER_NUM] = {0};
+    static uint8_t addr = 0;
+    static uint8_t full = 0;
+    float sum = 0, data_out;
+    uint8_t i;
+    
+    buf[addr] = data_in;
+    
+    for (i = 0; i < SPEED_FILTER_NUM; i++)
+    {
+        sum += buf[i];
+    }
+    
+    addr++;
+    if (addr == SPEED_FILTER_NUM)
+    {
+        addr = 0;
+        full = 1;
+    }
+    
+    if (full == 0)
+    {
+        data_out = sum / addr;
+    }
+    else
+    {
+        data_out = sum / SPEED_FILTER_NUM;
+    }
+    return data_out;
+}
+
+/******************************************************************************/
+float aver_gyroz_filter(int16_t data_in)
+{
+    static float buf[GYROZ_FILTER_NUM] = {0};
+    static uint8_t addr = 0;
+    static uint8_t full = 0;
+    float sum = 0, data_out;
+    uint8_t i;
+    
+    buf[addr] = data_in;
+    
+    for (i = 0; i < GYROZ_FILTER_NUM; i++)
+    {
+        sum += buf[i];
+    }
+    
+    addr++;
+    if (addr == GYROZ_FILTER_NUM)
+    {
+        addr = 0;
+        full = 1;
+    }
+    
+    if (full == 0)
+    {
+        data_out = sum / addr;
+    }
+    else
+    {
+        data_out = sum / GYROZ_FILTER_NUM;
+    }
+    return data_out;
+}

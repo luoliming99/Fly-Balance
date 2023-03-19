@@ -1,7 +1,7 @@
 #include "motor.h"
 #include "bsp_pwm.h"
 
-#ifdef FLY
+#if (PRODUCT == FLY)
 
 /******************************************************************************/
 void motor_driver(which_motor_e motor, int16_t pwm)
@@ -39,7 +39,7 @@ void motor_stop_all(void)
     motor_driver(MOTOR_RB, 0);
 }
 
-#else
+#elif (PRODUCT == CAR)
 
 #define __MOTOR_STAT_MIN_VAL    700     /* 电机转动下限值 */
 

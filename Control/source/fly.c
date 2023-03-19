@@ -5,19 +5,19 @@
 #include "led.h"
 #include "bsp_uart.h"
 
-#ifdef FLY
+#if (PRODUCT == FLY)
+
+static pid_param_t pitch_rate_pid;     /* 俯仰角速度环 */
+static pid_param_t yaw_rate_pid;       /* 偏航角速度环 */
+static pid_param_t roll_rate_pid;      /* 横滚角速度环 */
+
+static pid_param_t pitch_angle_pid;    /* 俯仰角度环 */
+static pid_param_t yaw_angle_pid;      /* 偏航角度环 */
+static pid_param_t roll_angle_pid;     /* 横滚角度环 */
 
 /******************************************************************************/
 void task_fly_pid_control(uint16_t accelerator, int16_t pitch_target, int16_t yaw_target, int16_t roll_target, mpu_result_t *mpu_data)
 {
-    static pid_param_t pitch_rate_pid;     /* 俯仰角速度环 */
-    static pid_param_t yaw_rate_pid;       /* 偏航角速度环 */
-    static pid_param_t roll_rate_pid;      /* 横滚角速度环 */
-
-    static pid_param_t pitch_angle_pid;    /* 俯仰角度环 */
-    static pid_param_t yaw_angle_pid;      /* 偏航角度环 */
-    static pid_param_t roll_angle_pid;     /* 横滚角度环 */
-    
     int16_t motor_pwm[MOTOR_NUM] = {0};
     
     pitch_angle_pid.kp = 6;
@@ -55,7 +55,7 @@ void task_fly_pid_control(uint16_t accelerator, int16_t pitch_target, int16_t ya
 
 /******************************************************************************/
 int task_fly_communication(uint16_t *accelerator, int16_t *pitch_target, int16_t *yaw_target, int16_t *roll_target, key_status_e *key_val,
-                           float batt_volt, mpu_result_t *mpu_data)
+                            float batt_volt, mpu_result_t *mpu_data)
 {
     int ret = 0;
     uint8_t nrf_rx_buf[PLOAD_WIDTH_MAX] = {0};
@@ -75,12 +75,13 @@ int task_fly_communication(uint16_t *accelerator, int16_t *pitch_target, int16_t
         *pitch_target = *(int16_t *)&nrf_rx_buf[2];
         *roll_target  = *(int16_t *)&nrf_rx_buf[4];
         *key_val  = (key_status_e)*(uint8_t *)&nrf_rx_buf[6];
-        printf("%d %d %d %d\r\n", *accelerator, *pitch_target, *roll_target, *key_val);
+//        printf("%d %d %d %d\r\n", *accelerator, *pitch_target, *roll_target, *key_val);
     }
     
     return ret;
 }
 
+/******************************************************************************/
 void task_fly_recv_data_handler(unlock_status_e *unlock_status, uint16_t *accelerator, int16_t *yaw_target, key_status_e key_val)
 {
     static float rudder_val = 180.0;   /* 打舵值(0° ~ 360°) */
@@ -93,15 +94,12 @@ void task_fly_recv_data_handler(unlock_status_e *unlock_status, uint16_t *accele
                 if (*accelerator > 850)
                 {
                     *unlock_status = UNLOCK_MAX_ACC;
-                    led_set(LED_LF, ON);
-                    led_set(LED_RF, ON);
                 }
             break;
             case UNLOCK_MAX_ACC:
                 if (*accelerator < 50)
                 {
                     *unlock_status = UNLOCK_SUCCESS;
-                    led_set(LED_LB, ON);
                     led_set(LED_RB, ON);
                 }
             break;

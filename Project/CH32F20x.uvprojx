@@ -414,6 +414,11 @@
               <FileType>1</FileType>
               <FilePath>..\Control\source\fly.c</FilePath>
             </File>
+            <File>
+              <FileName>balance.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Control\source\balance.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -443,6 +448,11 @@
               <FileName>mpu6500.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Device\source\mpu6500.c</FilePath>
+            </File>
+            <File>
+              <FileName>encoder.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Device\source\encoder.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -498,6 +508,11 @@
               <FileName>bsp_tim.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\BSP\source\bsp_tim.c</FilePath>
+            </File>
+            <File>
+              <FileName>bsp_encoder.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\BSP\source\bsp_encoder.c</FilePath>
             </File>
           </Files>
         </Group>

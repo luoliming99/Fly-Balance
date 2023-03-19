@@ -1,4 +1,5 @@
 #include "led.h"
+#include "common.h"
 
 /******************************************************************************/
 void led_init(void)
@@ -28,6 +29,15 @@ void led_init(void)
 /******************************************************************************/
 void led_set(which_led_e led, led_status_e status)
 {
+#if (PRODUCT == CAR)
+    switch (led)
+    {
+        case LED_LF: led = LED_LB; break;
+        case LED_RF: led = LED_LF; break;
+        case LED_LB: led = LED_RB; break;
+        case LED_RB: led = LED_RF; break;
+    }
+#endif
     switch (led)
     {
         case LED_LF:

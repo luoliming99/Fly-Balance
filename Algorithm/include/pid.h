@@ -22,4 +22,8 @@ typedef struct
 void pid_postion_cal(pid_param_t *pid, float target, float measure);
 void pid_incremental_cal(pid_param_t *pid, float target, float measure);
 
+void balance_control(pid_param_t *pid, float target, float measure);
+void speed_control(pid_param_t *pid, float target, float measure);
+void turn_control(pid_param_t *pid, float target, float measure);
+
 #endif

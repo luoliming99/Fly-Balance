@@ -4,7 +4,10 @@
 #include "ch32f20x.h"
 #include "mpu6500.h"
 
-#define FLY                                     /* 产品定义：FLY - 四轴飞行器，BALANCE - 两轮平衡车 */
+
+#define FLY                     1
+#define CAR                     2
+#define PRODUCT                 CAR             /* 产品定义：FLY - 四轴飞行器，CAR - 两轮平衡车 */
 
 #define PI                      3.1415927
 #define RADIAN_TO_ANGLE	        57.2957795      /* 180/PI */
@@ -12,11 +15,6 @@
 
 #define MPU_READ_DATA_PERIOD    0.002           /* 读取MPU传感器原始数据周期为2ms */
 
-#ifdef FLY
-    #define BATT_VOLT_LIMIT     2.8             /* 电池电压最低限制 */
-#else
-    #define BATT_VOLT_LIMIT     3.2
-#endif
 
 typedef enum
 {
