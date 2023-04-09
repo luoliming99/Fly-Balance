@@ -18,7 +18,7 @@
 
 #include "common.h"
 #include "fly.h"
-#include "balance.h"
+#include "car.h"
 
 
 extern uint8_t g_2ms_flag;
@@ -40,21 +40,26 @@ int main( void )
     mpu_result_t mpu_data;          /* MPU滤波、姿态解算后的数据 */
     
     float batt_volt = 0;            /* 电池电压，单位：V */
-
+    
+    unlock_status_e unlock_status   = UNLOCK_INIT;
+    
 #if (PRODUCT == FLY)
+    
     uint16_t accelerator  = 0;  /* 30 ~ 900 */
     int16_t  pitch_target = 0;  /* -30°~ 30° */
     int16_t  yaw_target   = 0;  /* -180°~ 180° */
     int16_t  roll_target  = 0;  /* -30°~ 30° */
     
     key_status_e    key_val         = NO_KEY_PRESS;
+    
 #elif (PRODUCT == CAR)
+    
     float speed_measure, speed_after_filter, gyroz_after_filter;
     int16_t speed_target = 0;   /* 行走速度，单位：r/min */
     int16_t turn_target  = 0;   /* 转向速度 */
+    
 #endif
  
-    unlock_status_e unlock_status   = UNLOCK_INIT;
 
     NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
 
@@ -125,7 +130,7 @@ int main( void )
                 }
             }
 #elif (PRODUCT == CAR)
-            task_balance_pid_control_5ms(mpu_data.roll);
+            task_car_pid_control_5ms(mpu_data.roll);
 #endif
         }
         if (1 == g_20ms_flag)
@@ -144,14 +149,14 @@ int main( void )
             speed_after_filter = aver_speed_filter(speed_measure);           
             gyroz_after_filter = aver_gyroz_filter(mpu_data.gyro_zout);
             
-            ret = task_balance_communication(&speed_target, &turn_target, batt_volt, speed_after_filter);
+            ret = task_car_communication(&speed_target, &turn_target, batt_volt, speed_after_filter);
             if (ret == 0)
             {   
                 led_set(LED_LB, TOGGLE);
-                task_balance_recv_data_handler(&unlock_status, &speed_target, &turn_target);
+                task_car_recv_data_handler(&unlock_status, &speed_target, &turn_target);
             }
             
-            task_balance_pid_control_20ms(speed_target, turn_target, speed_after_filter, gyroz_after_filter);
+            task_car_pid_control_20ms(speed_target, turn_target, speed_after_filter, gyroz_after_filter);
 #endif
         }
         if (1 == g_200ms_flag)

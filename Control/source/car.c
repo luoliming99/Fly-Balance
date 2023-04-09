@@ -1,4 +1,4 @@
-#include "balance.h"
+#include "car.h"
 #include "pid.h"
 #include "motor.h"
 #include "nrf24l01.h"
@@ -7,24 +7,24 @@
 
 #if (PRODUCT == CAR)
 
-static pid_param_t balance_pid;        /* 直立控制环 */
+static pid_param_t car_pid;        /* 直立控制环 */
 static pid_param_t speed_pid;          /* 速度控制环 */
 static pid_param_t turn_pid;           /* 转向控制环 */
 
 
 /******************************************************************************/
-void task_balance_pid_control_5ms(float angle_measure)
+void task_car_pid_control_5ms(float angle_measure)
 {
     int16_t motor_pwm[MOTOR_NUM] = {0};
     
     if (angle_measure > -30 && angle_measure < 30)
     {
-        balance_pid.kp = 50;
-        balance_pid.kd = 40;
-        balance_control(&balance_pid, speed_pid.out, angle_measure);
+        car_pid.kp = 50;
+        car_pid.kd = 40;
+        balance_control(&car_pid, speed_pid.out, angle_measure);
         
-        motor_pwm[MOTOR_L] = -balance_pid.out - turn_pid.out;
-        motor_pwm[MOTOR_R] = -balance_pid.out + turn_pid.out;
+        motor_pwm[MOTOR_L] = -car_pid.out - turn_pid.out;
+        motor_pwm[MOTOR_R] = -car_pid.out + turn_pid.out;
         motor_driver_all(motor_pwm);
     }
     else
@@ -36,7 +36,7 @@ void task_balance_pid_control_5ms(float angle_measure)
 }
 
 /******************************************************************************/
-void task_balance_pid_control_20ms(int16_t speed_target, int16_t turn_target, float speed_measure, float gyroz)
+void task_car_pid_control_20ms(int16_t speed_target, int16_t turn_target, float speed_measure, float gyroz)
 {
     speed_pid.kp = 0.1;
     speed_pid.ki = 0.003;
@@ -50,7 +50,7 @@ void task_balance_pid_control_20ms(int16_t speed_target, int16_t turn_target, fl
 }
 
 /******************************************************************************/
-int task_balance_communication(int16_t *speed_target, int16_t *turn_target, float batt_volt, float speed_measure)
+int task_car_communication(int16_t *speed_target, int16_t *turn_target, float batt_volt, float speed_measure)
 {
     int ret = 0;
     uint8_t nrf_rx_buf[PLOAD_WIDTH_MAX] = {0};
@@ -73,7 +73,7 @@ int task_balance_communication(int16_t *speed_target, int16_t *turn_target, floa
 }
 
 /******************************************************************************/
-void task_balance_recv_data_handler(unlock_status_e *unlock_status, int16_t *speed_target, int16_t *turn_target)
+void task_car_recv_data_handler(unlock_status_e *unlock_status, int16_t *speed_target, int16_t *turn_target)
 {
     if (UNLOCK_SUCCESS != *unlock_status)
     {
