@@ -62,7 +62,7 @@ void nrf24l01_tx_mode(void)
     spi_write_reg(NRF_WRITE_REG+EN_AA, 0x01);                               /* 使能通道0的自动应答 */
     spi_write_reg(NRF_WRITE_REG+EN_RXADDR, 0x01);                           /* 使能通道0的接收地址 */
     spi_write_reg(NRF_WRITE_REG+SETUP_RETR, 0x1A);                          /* 设置自动重发间隔时间：500us+86us，最大自动重发次数：10次 */
-    spi_write_reg(NRF_WRITE_REG+RF_CH, 0);                                  /* 设置RF通道工作频率 */
+    spi_write_reg(NRF_WRITE_REG+RF_CH, 50);                                 /* 设置RF通道工作频率 */
     spi_write_reg(NRF_WRITE_REG+RF_SETUP, 0x0F);                            /* 设置TX发射参数：0db增益，2Mbps，低噪声增益开启 */
     spi_write_reg(NRF_WRITE_REG+CONFIG, 0x0E);                              /* 配置基本工作模式的参数：所有中断开启，CRC使能，16位CRC校验，上电，发射模式 */
     
@@ -80,7 +80,7 @@ void nrf24l01_rx_mode(void)
     spi_write(NRF_WRITE_REG+RX_ADDR_P0, TX_ADR_WIDTH, (uint8_t *)tx_addr);  /* 设置通道0接收地址 */
     spi_write_reg(NRF_WRITE_REG+EN_AA, 0x01);                               /* 使能通道0的自动应答 */
     spi_write_reg(NRF_WRITE_REG+EN_RXADDR, 0x01);                           /* 使能通道0的接收地址 */
-    spi_write_reg(NRF_WRITE_REG+RF_CH, 0);                                  /* 设置RF通道工作频率 */
+    spi_write_reg(NRF_WRITE_REG+RF_CH, 50);                                 /* 设置RF通道工作频率 */
     spi_write_reg(NRF_WRITE_REG+RX_PW_P0, RX_PLOAD_WIDTH);                  /* 设置接收数据通道0的有效数据宽度 */
     spi_write_reg(NRF_WRITE_REG+RF_SETUP, 0x0F);                            /* 设置TX发射参数：0db增益，2Mbps，低噪声增益开启 */
     spi_write_reg(NRF_WRITE_REG+CONFIG, 0x0F);                              /* 配置基本工作模式的参数：所有中断开启，CRC使能，16位CRC校验，上电，接收模式 */

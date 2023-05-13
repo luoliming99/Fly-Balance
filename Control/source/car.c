@@ -7,9 +7,9 @@
 
 #if (PRODUCT == CAR)
 
-static pid_param_t car_pid;        /* 直立控制环 */
-static pid_param_t speed_pid;          /* 速度控制环 */
-static pid_param_t turn_pid;           /* 转向控制环 */
+static pid_param_t car_pid;         /* 直立控制环 */
+static pid_param_t speed_pid;       /* 速度控制环 */
+static pid_param_t turn_pid;        /* 转向控制环 */
 
 
 /******************************************************************************/

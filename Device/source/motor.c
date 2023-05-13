@@ -1,11 +1,19 @@
 #include "motor.h"
 #include "bsp_pwm.h"
 
-#if (PRODUCT == FLY)
+
+static int16_t _real_pwm[MOTOR_NUM] = {0};
+
+#if (PRODUCT == CAR)
+
+#define __MOTOR_STAT_MIN_VAL    700     /* 电机转动下限值 */
+
+#endif
 
 /******************************************************************************/
 void motor_driver(which_motor_e motor, int16_t pwm)
 {
+#if (PRODUCT == FLY)
     switch (motor)
     {
         case MOTOR_LF: PWM_CH1_SET(pwm); break;
@@ -14,40 +22,7 @@ void motor_driver(which_motor_e motor, int16_t pwm)
         case MOTOR_RB: PWM_CH4_SET(pwm); break;
         default: break;
     }
-}
-
-/******************************************************************************/
-void motor_driver_all(int16_t pwm[MOTOR_NUM])
-{
-    for (uint8_t i = 0; i < MOTOR_NUM; i++)
-    {
-        if (pwm[i] < 0) {
-            pwm[i] = 0;
-        } else if (pwm[i] > 1000) {
-            pwm[i] = 1000;
-        }
-        motor_driver((which_motor_e)i, pwm[i]);
-    }
-}
-
-/******************************************************************************/
-void motor_stop_all(void)
-{
-    motor_driver(MOTOR_LF, 0);
-    motor_driver(MOTOR_RF, 0);
-    motor_driver(MOTOR_LB, 0);
-    motor_driver(MOTOR_RB, 0);
-}
-
 #elif (PRODUCT == CAR)
-
-#define __MOTOR_STAT_MIN_VAL    700     /* 电机转动下限值 */
-
-static int16_t _real_pwm[MOTOR_NUM] = {0};
-
-/******************************************************************************/
-void motor_driver(which_motor_e motor, int16_t pwm)
-{
     if (pwm > 0)    /* 正转 */
     {
         switch (motor)
@@ -66,11 +41,26 @@ void motor_driver(which_motor_e motor, int16_t pwm)
             default: break;
         }
     }
+#endif
 }
 
 /******************************************************************************/
-void motor_driver_all(int16_t pwm[2])
+void motor_driver_all(int16_t pwm[MOTOR_NUM])
 {
+#if (PRODUCT == FLY)
+    for (uint8_t i = 0; i < MOTOR_NUM; i++)
+    {
+        if (pwm[i] < 0) {
+            pwm[i] = 0;
+        } else if (pwm[i] > 1000) {
+            pwm[i] = 1000;
+        }
+    
+        _real_pwm[i] = pwm[i];
+
+        motor_driver((which_motor_e)i, pwm[i]);
+    }
+#elif (PRODUCT == CAR)
     /* 根据电机特性，对PWM占空比做转换 */
     for (uint8_t i = 0; i < MOTOR_NUM; i++)
     {
@@ -92,6 +82,16 @@ void motor_driver_all(int16_t pwm[2])
         _real_pwm[i] = pwm[i];
         
         motor_driver((which_motor_e)i, pwm[i]);
+    }
+#endif
+}
+
+/******************************************************************************/
+void motor_stop_all(void)
+{
+    for (uint8_t i = 0; i < MOTOR_NUM; i++)
+    {
+        motor_driver((which_motor_e)i, 0);
     }
 }
 
@@ -116,5 +116,3 @@ void motor_brake_all(uint16_t factor)
         motor_driver((which_motor_e)i, _real_pwm[i]);
     }
 }
-
-#endif
