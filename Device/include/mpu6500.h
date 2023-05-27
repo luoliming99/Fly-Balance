@@ -29,17 +29,25 @@ typedef int (*pfn_i2c_write) (uint8_t slave_addr,
 
 typedef struct 
 {
-    int16_t accel_xout;
-    int16_t accel_yout;
-    int16_t accel_zout;
+    int16_t accel_xreg; /* 寄存器中的原始数据 */
+    int16_t accel_yreg;
+    int16_t accel_zreg;
     
-    int16_t gyro_xout;
-    int16_t gyro_yout;
-    int16_t gyro_zout;
+    int16_t gyro_xreg;
+    int16_t gyro_yreg;
+    int16_t gyro_zreg;
     
-    int16_t temp_out;
+    int16_t temp_reg;
+    
+    float   accel_x;    /* 滤波后的数据 */
+    float   accel_y;
+    float   accel_z;
+    
+    float   gyro_x;
+    float   gyro_y;
+    float   gyro_z;
+    
     float   temp;
-    
     float   pitch;      /* 俯仰角 */
     float   yaw;        /* 偏航角 */
     float   roll;       /* 横滚角 */

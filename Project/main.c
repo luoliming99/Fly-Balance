@@ -99,14 +99,8 @@ int main( void )
         {
             led_set(LED_LF, TOGGLE);
             g_2ms_flag = 0;
-#if (PRODUCT == FLY)
-            if (UNLOCK_SUCCESS == unlock_status)
-            {
-                task_imu_update(&mpu_data);
-            }
-#elif (PRODUCT == CAR)
+
             task_imu_update(&mpu_data);
-#endif    
         }
         if (1 == g_5ms_flag)
         {
@@ -146,10 +140,10 @@ int main( void )
             }
 #elif (PRODUCT == CAR)
             speed_measure = (encoder_l_speed_get() + encoder_r_speed_get()) / 2;
-            speed_after_filter = aver_speed_filter(speed_measure);           
-            gyroz_after_filter = aver_gyroz_filter(mpu_data.gyro_zout);
+            speed_after_filter = speed_lpf_filter(speed_measure, speed_after_filter);      
+            gyroz_after_filter = gyroz_lpf_filter(mpu_data.gyro_z, gyroz_after_filter);
             
-            ret = task_car_communication(&speed_target, &turn_target, batt_volt, speed_after_filter);
+            ret = task_car_communication(&speed_target, &turn_target, batt_volt, speed_after_filter, gyroz_after_filter);
             if (ret == 0)
             {   
                 led_set(LED_LB, TOGGLE);

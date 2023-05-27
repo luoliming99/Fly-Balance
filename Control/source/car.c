@@ -20,7 +20,7 @@ void task_car_pid_control_5ms(float angle_measure)
     if (angle_measure > -30 && angle_measure < 30)
     {
         car_pid.kp = 50;
-        car_pid.kd = 40;
+        car_pid.kd = 50;
         balance_control(&car_pid, speed_pid.out, angle_measure);
         
         motor_pwm[MOTOR_L] = -car_pid.out - turn_pid.out;
@@ -50,7 +50,7 @@ void task_car_pid_control_20ms(int16_t speed_target, int16_t turn_target, float 
 }
 
 /******************************************************************************/
-int task_car_communication(int16_t *speed_target, int16_t *turn_target, float batt_volt, float speed_measure)
+int task_car_communication(int16_t *speed_target, int16_t *turn_target, float batt_volt, float speed_measure, float gyroz)
 {
     int ret = 0;
     uint8_t nrf_rx_buf[PLOAD_WIDTH_MAX] = {0};
@@ -59,8 +59,9 @@ int task_car_communication(int16_t *speed_target, int16_t *turn_target, float ba
     /* 装载要回传给遥控器的数据 */
     *(uint16_t *)&nrf_tx_buf[0] = (uint16_t)(batt_volt * 100 + 0.5);    /* 电池电量 */
     *(int16_t *)&nrf_tx_buf[2]  = (int16_t)(speed_measure + 0.5);       /* 速度 */
+    *(int16_t *)&nrf_tx_buf[4]  = (int16_t)(gyroz + 0.5);               /* Z轴角速度值 */
     
-    ret = nrf24l01_rx_packet_ack_with_payload(nrf_rx_buf, nrf_tx_buf, 4);
+    ret = nrf24l01_rx_packet_ack_with_payload(nrf_rx_buf, nrf_tx_buf, 6);
     
     if (ret == 0)
     {   

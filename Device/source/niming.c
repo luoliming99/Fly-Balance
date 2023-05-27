@@ -11,10 +11,10 @@
  */
 static int __niming_report(uint8_t fun, uint8_t *p_buf, uint8_t len)
 {
-    uint8_t buf[32];
+    uint8_t buf[34];
     uint8_t i;
     
-    if (len > 28) return -1;
+    if (len > 30) return -1;
     
     buf[len+3] = 0; /* 校验和清零 */
     buf[0] = 0x88;  /* 帧头 */
@@ -41,23 +41,23 @@ void niming_report_imu(mpu_result_t *p_data)
 {
 	uint8_t buf[28] = {0};
     
-    buf[0] = p_data->accel_xout >> 8;
-    buf[1] = p_data->accel_xout;
+    buf[0] = (int16_t)p_data->accel_x >> 8;
+    buf[1] = (int16_t)p_data->accel_x;
         
-    buf[2] = p_data->accel_yout >> 8;
-    buf[3] = p_data->accel_yout;
+    buf[2] = (int16_t)p_data->accel_y >> 8;
+    buf[3] = (int16_t)p_data->accel_y;
     
-    buf[4] = p_data->accel_zout >> 8;
-    buf[5] = p_data->accel_zout;
+    buf[4] = (int16_t)p_data->accel_z >> 8;
+    buf[5] = (int16_t)p_data->accel_z;
     
-    buf[6] = p_data->gyro_xout >> 8;
-    buf[7] = p_data->gyro_xout;
+    buf[6] = (int16_t)p_data->gyro_x >> 8;
+    buf[7] = (int16_t)p_data->gyro_x;
     
-    buf[8] = p_data->gyro_yout >> 8;
-    buf[9] = p_data->gyro_yout;
+    buf[8] = (int16_t)p_data->gyro_y >> 8;
+    buf[9] = (int16_t)p_data->gyro_y;
     
-    buf[10] = p_data->gyro_zout >> 8;
-    buf[11] = p_data->gyro_zout;
+    buf[10] = (int16_t)p_data->gyro_z >> 8;
+    buf[11] = (int16_t)p_data->gyro_z;
     
     /* buf[12]~buf[17]为磁场传感器数据 */
     
@@ -78,34 +78,52 @@ void niming_report_imu(mpu_result_t *p_data)
 /******************************************************************************/
 void niming_report_data(mpu_result_t *p_data)
 {
-	uint8_t buf[18] = {0};
+	uint8_t buf[30] = {0};
     
-    buf[0] = p_data->accel_xout >> 8;
-    buf[1] = p_data->accel_xout;
+    buf[0] = p_data->accel_xreg >> 8;
+    buf[1] = p_data->accel_xreg;
         
-    buf[2] = p_data->accel_yout >> 8;
-    buf[3] = p_data->accel_yout;
+    buf[2] = p_data->accel_yreg >> 8;
+    buf[3] = p_data->accel_yreg;
     
-    buf[4] = p_data->accel_zout >> 8;
-    buf[5] = p_data->accel_zout;
+    buf[4] = p_data->accel_zreg >> 8;
+    buf[5] = p_data->accel_zreg;
     
-    buf[6] = p_data->gyro_xout >> 8;
-    buf[7] = p_data->gyro_xout;
+    buf[6] = p_data->gyro_xreg >> 8;
+    buf[7] = p_data->gyro_xreg;
     
-    buf[8] = p_data->gyro_yout >> 8;
-    buf[9] = p_data->gyro_yout;
+    buf[8] = p_data->gyro_yreg >> 8;
+    buf[9] = p_data->gyro_yreg;
     
-    buf[10] = p_data->gyro_zout >> 8;
-    buf[11] = p_data->gyro_zout;
+    buf[10] = p_data->gyro_zreg >> 8;
+    buf[11] = p_data->gyro_zreg;
+    
+    buf[12] = (int16_t)p_data->accel_x >> 8;
+    buf[13] = (int16_t)p_data->accel_x;
+        
+    buf[14] = (int16_t)p_data->accel_y >> 8;
+    buf[15] = (int16_t)p_data->accel_y;
+    
+    buf[16] = (int16_t)p_data->accel_z >> 8;
+    buf[17] = (int16_t)p_data->accel_z;
+    
+    buf[18] = (int16_t)p_data->gyro_x >> 8;
+    buf[19] = (int16_t)p_data->gyro_x;
+    
+    buf[20] = (int16_t)p_data->gyro_y >> 8;
+    buf[21] = (int16_t)p_data->gyro_y;
+    
+    buf[22] = (int16_t)p_data->gyro_z >> 8;
+    buf[23] = (int16_t)p_data->gyro_z;
 
-    buf[12] = (int16_t)(p_data->roll * 100) >> 8;
-    buf[13] = (int16_t)(p_data->roll * 100);
+    buf[24] = (int16_t)(p_data->roll * 100) >> 8;
+    buf[25] = (int16_t)(p_data->roll * 100);
     
-    buf[14] = (int16_t)(p_data->pitch * 100) >> 8;
-    buf[15] = (int16_t)(p_data->pitch * 100);
+    buf[26] = (int16_t)(p_data->pitch * 100) >> 8;
+    buf[27] = (int16_t)(p_data->pitch * 100);
     
-    buf[16] = (int16_t)(p_data->yaw * 10) >> 8;
-    buf[17] = (int16_t)(p_data->yaw * 10);
+    buf[28] = (int16_t)(p_data->yaw * 10) >> 8;
+    buf[29] = (int16_t)(p_data->yaw * 10);
     
-	__niming_report(0XA1, buf, 18);    /* 观察波形：0xA1 */
+	__niming_report(0XA1, buf, 30);    /* 观察波形：0xA1 */
 }

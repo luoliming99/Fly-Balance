@@ -9,8 +9,8 @@ static pfn_i2c_read  i2c_read;
 static pfn_i2c_write i2c_write;
 
 static int16_t _mpu_offset[6] = {0};
-static const int16_t _accel_val_limit = 1000;
-static const int16_t _gyro_val_limit = 100;
+static const int16_t _accel_val_limit = 2000;
+static const int16_t _gyro_val_limit = 200;
 
 static void _mpu_get_offset(void)
 {
@@ -23,11 +23,11 @@ static void _mpu_get_offset(void)
         led_set(LED_LF, TOGGLE);
         delay_ms(200);
         mpu_read_raw_data(&raw_data);
-        if ((raw_data.accel_xout < -_accel_val_limit || raw_data.accel_xout > _accel_val_limit) ||
-            (raw_data.accel_yout < -_accel_val_limit || raw_data.accel_yout > _accel_val_limit) ||
-            (raw_data.gyro_xout < -_gyro_val_limit || raw_data.gyro_xout > _gyro_val_limit)     ||
-            (raw_data.gyro_yout < -_gyro_val_limit || raw_data.gyro_yout > _gyro_val_limit)     ||
-            (raw_data.gyro_zout < -_gyro_val_limit || raw_data.gyro_zout > _gyro_val_limit))
+        if ((raw_data.accel_xreg < -_accel_val_limit || raw_data.accel_xreg > _accel_val_limit) ||
+            (raw_data.accel_yreg < -_accel_val_limit || raw_data.accel_yreg > _accel_val_limit) ||
+            (raw_data.gyro_xreg < -_gyro_val_limit || raw_data.gyro_xreg > _gyro_val_limit)     ||
+            (raw_data.gyro_yreg < -_gyro_val_limit || raw_data.gyro_yreg > _gyro_val_limit)     ||
+            (raw_data.gyro_zreg < -_gyro_val_limit || raw_data.gyro_zreg > _gyro_val_limit))
         {
             correct_cnt = 0;
             offset_sum[0] = 0;
@@ -37,19 +37,19 @@ static void _mpu_get_offset(void)
             offset_sum[4] = 0;
             offset_sum[5] = 0;
             printf("Error:%d %d %d %d %d %d\r\n",
-                    raw_data.accel_xout, raw_data.accel_yout, raw_data.accel_zout,
-                    raw_data.gyro_xout, raw_data.gyro_yout, raw_data.gyro_zout);
+                    raw_data.accel_xreg, raw_data.accel_yreg, raw_data.accel_zreg,
+                    raw_data.gyro_xreg, raw_data.gyro_yreg, raw_data.gyro_zreg);
             continue;
         }
         printf("%d %d %d %d %d %d\r\n",
-                raw_data.accel_xout, raw_data.accel_yout, raw_data.accel_zout,
-                raw_data.gyro_xout, raw_data.gyro_yout, raw_data.gyro_zout);
-        offset_sum[0] += raw_data.accel_xout;
-        offset_sum[1] += raw_data.accel_yout;
-        offset_sum[2] += raw_data.accel_zout;
-        offset_sum[3] += raw_data.gyro_xout;
-        offset_sum[4] += raw_data.gyro_yout;
-        offset_sum[5] += raw_data.gyro_zout;
+                raw_data.accel_xreg, raw_data.accel_yreg, raw_data.accel_zreg,
+                raw_data.gyro_xreg, raw_data.gyro_yreg, raw_data.gyro_zreg);
+        offset_sum[0] += raw_data.accel_xreg;
+        offset_sum[1] += raw_data.accel_yreg;
+        offset_sum[2] += raw_data.accel_zreg;
+        offset_sum[3] += raw_data.gyro_xreg;
+        offset_sum[4] += raw_data.gyro_yreg;
+        offset_sum[5] += raw_data.gyro_zreg;
 
         correct_cnt++;
     } while (correct_cnt < 16);
@@ -98,7 +98,7 @@ int mpu_init(pfn_i2c_read read, pfn_i2c_write write)
     regval = 0x03;  /* 退出Sleep模式，配置陀螺仪时钟源为z轴时钟PLL */
     i2c_write(MPU6500_I2C_ADDR, MPU_REG_PWR_MGMT_1, 1, &regval);
     
-    regval = 0x01;  /* 配置采样频率分频器,div=2,fout=fsamp/div=500Hz */
+    regval = 0x01;  /* 配置采样频率分频器,div=2,freg=fsamp/div=500Hz */
     i2c_write(MPU6500_I2C_ADDR, MPU_REG_SMPLRT_DIV, 1, &regval);
     
     regval = 0x03;  /* 配置陀螺仪低通数字滤波器，bandWidth=41Hz,fsamp=1kHz */
@@ -124,34 +124,34 @@ void mpu_read_raw_data(mpu_result_t *p_data)
     uint8_t regval[14] = {0};
     
     /*
-     * 0x3B~0x40: accel_out
-     * 0x41~0x42: temp_out
-     * 0x43~0x48: gyro_out
+     * 0x3B~0x40: accel_reg
+     * 0x41~0x42: temp_reg
+     * 0x43~0x48: gyro_reg
      */
     i2c_read(MPU6500_I2C_ADDR, MPU_REG_ACCEL_XOUT_H, 14, regval);
     
-    p_data->accel_xout = ((uint16_t)regval[0] << 8) | regval[1];
-    p_data->accel_yout = ((uint16_t)regval[2] << 8) | regval[3];
-    p_data->accel_zout = ((uint16_t)regval[4] << 8) | regval[5];
+    p_data->accel_xreg = ((uint16_t)regval[0] << 8) | regval[1];
+    p_data->accel_yreg = ((uint16_t)regval[2] << 8) | regval[3];
+    p_data->accel_zreg = ((uint16_t)regval[4] << 8) | regval[5];
     
-    p_data->temp_out = ((uint16_t)regval[6] << 8) | regval[7];
+    p_data->temp_reg = ((uint16_t)regval[6] << 8) | regval[7];
     
-    p_data->gyro_xout = ((uint16_t)regval[8] << 8)  | regval[9];
-    p_data->gyro_yout = ((uint16_t)regval[10] << 8) | regval[11];
-    p_data->gyro_zout = ((uint16_t)regval[12] << 8) | regval[13];
+    p_data->gyro_xreg = ((uint16_t)regval[8] << 8)  | regval[9];
+    p_data->gyro_yreg = ((uint16_t)regval[10] << 8) | regval[11];
+    p_data->gyro_zreg = ((uint16_t)regval[12] << 8) | regval[13];
     
-    p_data->temp = ((double)p_data->temp_out/340.0)+36.53;
+    p_data->temp = ((double)p_data->temp_reg/340.0)+36.53;
 }
 
 /******************************************************************************/
 void mpu_raw_data_calibration(mpu_result_t *p_data)
 {
-    p_data->accel_xout -= _mpu_offset[0];
-    p_data->accel_yout -= _mpu_offset[1];
-    p_data->accel_zout -= _mpu_offset[2];
-    p_data->gyro_xout -= _mpu_offset[3];
-    p_data->gyro_yout -= _mpu_offset[4];
-    p_data->gyro_zout -= _mpu_offset[5];
+    p_data->accel_xreg -= _mpu_offset[0];
+    p_data->accel_yreg -= _mpu_offset[1];
+    p_data->accel_zreg -= _mpu_offset[2];
+    p_data->gyro_xreg -= _mpu_offset[3];
+    p_data->gyro_yreg -= _mpu_offset[4];
+    p_data->gyro_zreg -= _mpu_offset[5];
 }
 
 /****************************** 以下为MPU相关函数 *****************************/
@@ -182,13 +182,13 @@ void imu_update(mpu_result_t *p_data)
     static float ex_int = 0, ey_int = 0, ez_int = 0;
     
     /* 加速度计的三维向量转成单位向量 */
-    norm = _fast_inv_sqrt((float)p_data->accel_xout * p_data->accel_xout + 
-                          (float)p_data->accel_yout * p_data->accel_yout + 
-                          (float)p_data->accel_zout * p_data->accel_zout);
+    norm = _fast_inv_sqrt((float)p_data->accel_x * p_data->accel_x + 
+                          (float)p_data->accel_y * p_data->accel_y + 
+                          (float)p_data->accel_z * p_data->accel_z);
 
-    ax = p_data->accel_xout * norm;
-    ay = p_data->accel_yout * norm;
-    az = p_data->accel_zout * norm;
+    ax = p_data->accel_x * norm;
+    ay = p_data->accel_y * norm;
+    az = p_data->accel_z * norm;
     
     vx = 2 * (q1 * q3 - q0 * q2);
     vy = 2 * (q0 * q1 + q2 * q3);
@@ -203,9 +203,9 @@ void imu_update(mpu_result_t *p_data)
     ez_int = ez_int + ez * _ki;
     
     
-    gx = p_data->gyro_xout * GYRO_VAL_TO_RADIAN + _kp * ex + ex_int;
-    gy = p_data->gyro_yout * GYRO_VAL_TO_RADIAN + _kp * ey + ey_int;
-    gz = p_data->gyro_zout * GYRO_VAL_TO_RADIAN + _kp * ez + ez_int; 
+    gx = p_data->gyro_x * GYRO_VAL_TO_RADIAN + _kp * ex + ex_int;
+    gy = p_data->gyro_y * GYRO_VAL_TO_RADIAN + _kp * ey + ey_int;
+    gz = p_data->gyro_z * GYRO_VAL_TO_RADIAN + _kp * ez + ez_int; 
     
     float q0_last = q0;
     float q1_last = q1;

@@ -36,15 +36,15 @@ void task_fly_pid_control(uint16_t accelerator, int16_t pitch_target, int16_t ya
     pitch_rate_pid.kp = 3;
     pitch_rate_pid.ki = 0;
     pitch_rate_pid.kd = 10;
-    pid_postion_cal(&pitch_rate_pid, pitch_angle_pid.out, mpu_data->gyro_yout >> 4);
+    pid_postion_cal(&pitch_rate_pid, pitch_angle_pid.out, (int16_t)mpu_data->gyro_y >> 4);
     roll_rate_pid.kp = 3;
     roll_rate_pid.ki = 0;
     roll_rate_pid.kd = 10;
-    pid_postion_cal(&roll_rate_pid, roll_angle_pid.out, mpu_data->gyro_xout >> 4);
+    pid_postion_cal(&roll_rate_pid, roll_angle_pid.out, (int16_t)mpu_data->gyro_x >> 4);
     yaw_rate_pid.kp = 1;
     yaw_rate_pid.ki = 0;
     yaw_rate_pid.kd = 0;
-    pid_postion_cal(&yaw_rate_pid, yaw_angle_pid.out, mpu_data->gyro_zout >> 4);
+    pid_postion_cal(&yaw_rate_pid, yaw_angle_pid.out, (int16_t)mpu_data->gyro_z >> 4);
 
     motor_pwm[MOTOR_LF] = pitch_rate_pid.out - roll_rate_pid.out - yaw_rate_pid.out + accelerator;
     motor_pwm[MOTOR_RF] = pitch_rate_pid.out + roll_rate_pid.out + yaw_rate_pid.out + accelerator;
@@ -113,6 +113,10 @@ void task_fly_recv_data_handler(unlock_status_e *unlock_status, uint16_t *accele
         {
             *accelerator = 0;
         }
+//        else
+//        {
+//            *accelerator = 300;
+//        }
         switch (key_val)
         {
             case KEY_L_PRESS: 

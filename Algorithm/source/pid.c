@@ -51,7 +51,6 @@ void balance_control(pid_param_t *pid, float target, float measure)
     pid->error = target - measure;
     pid->differ = pid->error - pid->pre_error;
     
-    
     pid->out = pid->kp * pid->error +
                pid->kd * pid->differ;
     
