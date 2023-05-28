@@ -26,7 +26,6 @@ typedef enum
 typedef enum
 {
     UNLOCK_INIT = 0,
-    UNLOCK_MAX_ACC,
     UNLOCK_SUCCESS
 } unlock_status_e;
 

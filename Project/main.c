@@ -120,7 +120,7 @@ int main( void )
                 }
                 else
                 {
-                    task_fly_pid_control(accelerator, pitch_target, yaw_target, roll_target, &mpu_data);
+                    task_fly_pid_control_5ms(accelerator, pitch_target, yaw_target, roll_target, &mpu_data);
                 }
             }
 #elif (PRODUCT == CAR)
@@ -131,23 +131,30 @@ int main( void )
         {
             g_20ms_flag = 0;
 #if (PRODUCT == FLY)           
-            ret = task_fly_communication(&accelerator, &pitch_target, &yaw_target, &roll_target, &key_val,
-                                         batt_volt, &mpu_data);
+            ret = task_fly_communication(&unlock_status, &accelerator, &pitch_target, &yaw_target,
+                                    &roll_target, &key_val, batt_volt, &mpu_data);
             if (ret == 0)
             {   
                 led_set(LED_LB, TOGGLE);
-                task_fly_recv_data_handler(&unlock_status, &accelerator, &yaw_target, key_val);
+                task_fly_recv_data_handler(&accelerator, &yaw_target, key_val);
+            }
+            else
+            {
+                led_set(LED_LB, OFF);
             }
 #elif (PRODUCT == CAR)
             speed_measure = (encoder_l_speed_get() + encoder_r_speed_get()) / 2;
             speed_after_filter = speed_lpf_filter(speed_measure, speed_after_filter);      
             gyroz_after_filter = gyroz_lpf_filter(mpu_data.gyro_z, gyroz_after_filter);
             
-            ret = task_car_communication(&speed_target, &turn_target, batt_volt, speed_after_filter, gyroz_after_filter);
+            ret = task_car_communication(&unlock_status, &speed_target, &turn_target, batt_volt, speed_after_filter, gyroz_after_filter);
             if (ret == 0)
             {   
                 led_set(LED_LB, TOGGLE);
-                task_car_recv_data_handler(&unlock_status, &speed_target, &turn_target);
+            }
+            else
+            {
+                led_set(LED_LB, OFF);
             }
             
             task_car_pid_control_20ms(speed_target, turn_target, speed_after_filter, gyroz_after_filter);

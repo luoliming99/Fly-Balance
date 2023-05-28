@@ -4,6 +4,7 @@
 #include "nrf24l01.h"
 #include "led.h"
 #include "bsp_uart.h"
+#include "string.h"     /* memcpy(), strcmp() */
 
 #if (PRODUCT == CAR)
 
@@ -50,60 +51,47 @@ void task_car_pid_control_20ms(int16_t speed_target, int16_t turn_target, float 
 }
 
 /******************************************************************************/
-int task_car_communication(int16_t *speed_target, int16_t *turn_target, float batt_volt, float speed_measure, float gyroz)
+int task_car_communication(unlock_status_e *unlock_status, int16_t *speed_target, int16_t *turn_target, float batt_volt, float speed_measure, float gyroz)
 {
     int ret = 0;
     uint8_t nrf_rx_buf[PLOAD_WIDTH_MAX] = {0};
     uint8_t nrf_tx_buf[PLOAD_WIDTH_MAX] = {0};
     
     /* 装载要回传给遥控器的数据 */
-    *(uint16_t *)&nrf_tx_buf[0] = (uint16_t)(batt_volt * 100 + 0.5);    /* 电池电量 */
-    *(int16_t *)&nrf_tx_buf[2]  = (int16_t)(speed_measure + 0.5);       /* 速度 */
-    *(int16_t *)&nrf_tx_buf[4]  = (int16_t)(gyroz + 0.5);               /* Z轴角速度值 */
+    memcpy(nrf_tx_buf, (const char *)"CAR", 4);
+    *(uint16_t *)&nrf_tx_buf[4] = (uint16_t)(batt_volt * 100 + 0.5);    /* 电池电量 */
+    *(int16_t *)&nrf_tx_buf[6]  = (int16_t)(speed_measure + 0.5);       /* 速度 */
+    *(int16_t *)&nrf_tx_buf[8]  = (int16_t)(gyroz + 0.5);               /* Z轴角速度值 */
     
-    ret = nrf24l01_rx_packet_ack_with_payload(nrf_rx_buf, nrf_tx_buf, 6);
+    ret = nrf24l01_rx_packet_ack_with_payload(nrf_rx_buf, nrf_tx_buf, 10);
     
     if (ret == 0)
     {   
-        *speed_target  = *(int16_t *)&nrf_rx_buf[0];
-        *turn_target = *(int16_t *)&nrf_rx_buf[2];
+        if (strcmp((const char *)nrf_rx_buf, "CAR") != 0)   /* 未连接到平衡车遥控器 */
+        {
+            return -1;
+        }
+        
+        switch (*unlock_status)
+        {
+            case UNLOCK_INIT:
+                if (*(int16_t *)&nrf_rx_buf[4] == 0 &&
+                    *(int16_t *)&nrf_rx_buf[6] == 0)
+                {
+                    *unlock_status = UNLOCK_SUCCESS;
+                    led_set(LED_RB, ON);
+                }
+            break;
+            case UNLOCK_SUCCESS:
+                *speed_target  = *(int16_t *)&nrf_rx_buf[4];
+                *turn_target = *(int16_t *)&nrf_rx_buf[6];
+            break;
+            default: break;
+        }
 //        printf("%d %d\r\n", *speed_target, *turn_target);
     }
     
     return ret;
 }
 
-/******************************************************************************/
-void task_car_recv_data_handler(unlock_status_e *unlock_status, int16_t *speed_target, int16_t *turn_target)
-{
-    if (UNLOCK_SUCCESS != *unlock_status)
-    {
-        switch (*unlock_status)
-        {
-            case UNLOCK_INIT:
-                if (*speed_target > -20 && *speed_target < 20 &&
-                    *turn_target > -100 && *turn_target < 100)
-                {
-                    *unlock_status = UNLOCK_SUCCESS;
-                    led_set(LED_RB, ON);
-                }
-            break;
-            default: break;
-        }
-        *speed_target = 0;
-        *turn_target = 0;
-    }
-    else
-    {
-        if (*speed_target > -20 && *speed_target < 20)
-        {
-            *speed_target = 0;
-        }
-        if (*turn_target > -100 && *turn_target < 100)
-        {
-            *turn_target = 0;
-        }
-    }
-}
-    
 #endif

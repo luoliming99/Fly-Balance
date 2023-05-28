@@ -4,6 +4,7 @@
 #include "nrf24l01.h"
 #include "led.h"
 #include "bsp_uart.h"
+#include "string.h"     /* memcpy(), strcmp() */
 
 #if (PRODUCT == FLY)
 
@@ -16,7 +17,7 @@ static pid_param_t yaw_angle_pid;      /* 偏航角度环 */
 static pid_param_t roll_angle_pid;     /* 横滚角度环 */
 
 /******************************************************************************/
-void task_fly_pid_control(uint16_t accelerator, int16_t pitch_target, int16_t yaw_target, int16_t roll_target, mpu_result_t *mpu_data)
+void task_fly_pid_control_5ms(uint16_t accelerator, int16_t pitch_target, int16_t yaw_target, int16_t roll_target, mpu_result_t *mpu_data)
 {
     int16_t motor_pwm[MOTOR_NUM] = {0};
     
@@ -54,89 +55,84 @@ void task_fly_pid_control(uint16_t accelerator, int16_t pitch_target, int16_t ya
 }
 
 /******************************************************************************/
-int task_fly_communication(uint16_t *accelerator, int16_t *pitch_target, int16_t *yaw_target, int16_t *roll_target, key_status_e *key_val,
-                            float batt_volt, mpu_result_t *mpu_data)
+int task_fly_communication(unlock_status_e *unlock_status, uint16_t *accelerator, int16_t *pitch_target, int16_t *yaw_target, int16_t *roll_target, 
+                        key_status_e *key_val, float batt_volt, mpu_result_t *mpu_data)
 {
     int ret = 0;
     uint8_t nrf_rx_buf[PLOAD_WIDTH_MAX] = {0};
     uint8_t nrf_tx_buf[PLOAD_WIDTH_MAX] = {0};
     
     /* 装载要回传给遥控器的数据 */
-    *(uint16_t *)&nrf_tx_buf[0] = (uint16_t)(batt_volt * 100 + 0.5);    /* 电池电量 */
-    *(int16_t *)&nrf_tx_buf[2]  = (int16_t)(mpu_data->pitch + 0.5);     /* 俯仰角 */
-    *(int16_t *)&nrf_tx_buf[4]  = (int16_t)(mpu_data->roll + 0.5);      /* 横滚角 */
-    *(int16_t *)&nrf_tx_buf[6]  = (int16_t)(mpu_data->yaw + 0.5);       /* 偏航角 */
+    memcpy(nrf_tx_buf, (const char *)"FLY", 4);
+    *(uint16_t *)&nrf_tx_buf[4] = (uint16_t)(batt_volt * 100 + 0.5);    /* 电池电量 */
+    *(int16_t *)&nrf_tx_buf[6]  = (int16_t)(mpu_data->pitch + 0.5);     /* 俯仰角 */
+    *(int16_t *)&nrf_tx_buf[8]  = (int16_t)(mpu_data->roll + 0.5);      /* 横滚角 */
+    *(int16_t *)&nrf_tx_buf[10]  = (int16_t)(mpu_data->yaw + 0.5);      /* 偏航角 */
     
-    ret = nrf24l01_rx_packet_ack_with_payload(nrf_rx_buf, nrf_tx_buf, 8);
+    ret = nrf24l01_rx_packet_ack_with_payload(nrf_rx_buf, nrf_tx_buf, 12);
     
     if (ret == 0)
     {   
-        *accelerator  = *(uint16_t *)&nrf_rx_buf[0];
-        *pitch_target = *(int16_t *)&nrf_rx_buf[2];
-        *roll_target  = *(int16_t *)&nrf_rx_buf[4];
-        *key_val  = (key_status_e)*(uint8_t *)&nrf_rx_buf[6];
-//        printf("%d %d %d %d\r\n", *accelerator, *pitch_target, *roll_target, *key_val);
+        if (strcmp((const char *)nrf_rx_buf, "FLY") != 0)   /* 未连接到飞行器遥控器 */
+        {
+            return -1;
+        }
+
+        switch (*unlock_status)
+        {
+            case UNLOCK_INIT:
+                if (*(uint16_t *)&nrf_rx_buf[4] < 50)   /* 油门摇杆在最小位置才能解锁成功 */
+                {
+                    *unlock_status = UNLOCK_SUCCESS;
+                    led_set(LED_RB, ON);
+                } 
+            break;
+            case UNLOCK_SUCCESS:
+                *accelerator  = *(uint16_t *)&nrf_rx_buf[4];
+                *pitch_target = *(int16_t *)&nrf_rx_buf[6];
+                *roll_target  = *(int16_t *)&nrf_rx_buf[8];
+                *key_val  = (key_status_e)*(uint8_t *)&nrf_rx_buf[10];
+            break;
+            default: break;
+        }
+//        printf("%d %d %d %d %d\r\n", *unlock_status, *accelerator, *pitch_target, *roll_target, *key_val);
     }
     
     return ret;
 }
 
 /******************************************************************************/
-void task_fly_recv_data_handler(unlock_status_e *unlock_status, uint16_t *accelerator, int16_t *yaw_target, key_status_e key_val)
+void task_fly_recv_data_handler(uint16_t *accelerator, int16_t *yaw_target, key_status_e key_val)
 {
     static float rudder_val = 180.0;   /* 打舵值(0° ~ 360°) */
     
-    if (*unlock_status != UNLOCK_SUCCESS)
+    if (*accelerator < 300)
     {
-        switch (*unlock_status)
-        {
-            case UNLOCK_INIT:
-                if (*accelerator > 850)
-                {
-                    *unlock_status = UNLOCK_MAX_ACC;
-                }
-            break;
-            case UNLOCK_MAX_ACC:
-                if (*accelerator < 50)
-                {
-                    *unlock_status = UNLOCK_SUCCESS;
-                    led_set(LED_RB, ON);
-                }
-            break;
-            default: break;
-        }
         *accelerator = 0;
     }
-    else
+//    else
+//    {
+//        *accelerator = 300;
+//    }
+    switch (key_val)
     {
-        if (*accelerator < 300)
-        {
-            *accelerator = 0;
-        }
-//        else
-//        {
-//            *accelerator = 300;
-//        }
-        switch (key_val)
-        {
-            case KEY_L_PRESS: 
-                rudder_val -= 0.4;
-                if (rudder_val <= 0.0)
-                {
-                    rudder_val = 360;
-                }
-            break;
-            case KEY_R_PRESS:
-                rudder_val += 0.4;
-                if (rudder_val >= 360.0)
-                {
-                    rudder_val = 0;
-                }
-            break;
-            default: break;
-        }
-        *yaw_target = 180 - rudder_val;
-    } 
+        case KEY_L_PRESS: 
+            rudder_val -= 0.4;
+            if (rudder_val <= 0.0)
+            {
+                rudder_val = 360;
+            }
+        break;
+        case KEY_R_PRESS:
+            rudder_val += 0.4;
+            if (rudder_val >= 360.0)
+            {
+                rudder_val = 0;
+            }
+        break;
+        default: break;
+    }
+    *yaw_target = 180 - rudder_val;
 }
 
 
