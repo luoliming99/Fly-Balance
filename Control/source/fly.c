@@ -8,43 +8,67 @@
 
 #if (PRODUCT == FLY)
 
-static pid_param_t pitch_rate_pid;     /* 俯仰角速度环 */
-static pid_param_t yaw_rate_pid;       /* 偏航角速度环 */
-static pid_param_t roll_rate_pid;      /* 横滚角速度环 */
+/* 俯仰角速度环 */
+static pid_param_t pitch_rate_pid
+{
+    .kp = 6,
+    .ki = 0,
+    .kd = 0,
+    .pre_error = 0,
+};
+/* 横滚角速度环 */
+static pid_param_t roll_rate_pid
+{
+    .kp = 6,
+    .ki = 0,
+    .kd = 0,
+    .pre_error = 0,
+};
+/* 偏航角速度环 */
+static pid_param_t yaw_rate_pid
+{
+    .kp = 10,
+    .ki = 0,
+    .kd = 0,
+    .pre_error = 0,
+};
 
-static pid_param_t pitch_angle_pid;    /* 俯仰角度环 */
-static pid_param_t yaw_angle_pid;      /* 偏航角度环 */
-static pid_param_t roll_angle_pid;     /* 横滚角度环 */
+/* 俯仰角度环 */
+static pid_param_t pitch_angle_pid
+{
+    .kp = 3,
+    .ki = 0,
+    .kd = 10,
+    .pre_error = 0,
+};
+/* 横滚角度环 */
+static pid_param_t roll_angle_pid
+{
+    .kp = 3,
+    .ki = 0,
+    .kd = 10,
+    .pre_error = 0,
+};
+/* 偏航角度环 */
+static pid_param_t yaw_angle_pid
+{
+    .kp = 1,
+    .ki = 0,
+    .kd = 0,
+    .pre_error = 0,
+};
 
 /******************************************************************************/
 void task_fly_pid_control_5ms(uint16_t accelerator, int16_t pitch_target, int16_t yaw_target, int16_t roll_target, mpu_result_t *mpu_data)
 {
     int16_t motor_pwm[MOTOR_NUM] = {0};
     
-    pitch_angle_pid.kp = 6;
-    pitch_angle_pid.ki = 0;
-    pitch_angle_pid.kd = 0;
     pid_postion_cal(&pitch_angle_pid, pitch_target, mpu_data->pitch);
-    roll_angle_pid.kp = 6;
-    roll_angle_pid.ki = 0;
-    roll_angle_pid.kd = 0;
     pid_postion_cal(&roll_angle_pid, roll_target, mpu_data->roll);
-    yaw_angle_pid.kp = 10;
-    yaw_angle_pid.ki = 0;
-    yaw_angle_pid.kd = 0;
     pid_postion_cal(&yaw_angle_pid, yaw_target, mpu_data->yaw);
 
-    pitch_rate_pid.kp = 3;
-    pitch_rate_pid.ki = 0;
-    pitch_rate_pid.kd = 10;
     pid_postion_cal(&pitch_rate_pid, pitch_angle_pid.out, (int16_t)mpu_data->gyro_y >> 4);
-    roll_rate_pid.kp = 3;
-    roll_rate_pid.ki = 0;
-    roll_rate_pid.kd = 10;
     pid_postion_cal(&roll_rate_pid, roll_angle_pid.out, (int16_t)mpu_data->gyro_x >> 4);
-    yaw_rate_pid.kp = 1;
-    yaw_rate_pid.ki = 0;
-    yaw_rate_pid.kd = 0;
     pid_postion_cal(&yaw_rate_pid, yaw_angle_pid.out, (int16_t)mpu_data->gyro_z >> 4);
 
     motor_pwm[MOTOR_LF] = pitch_rate_pid.out - roll_rate_pid.out - yaw_rate_pid.out + accelerator;

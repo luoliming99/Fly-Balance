@@ -8,9 +8,29 @@
 
 #if (PRODUCT == CAR)
 
-static pid_param_t car_pid;         /* 直立控制环 */
-static pid_param_t speed_pid;       /* 速度控制环 */
-static pid_param_t turn_pid;        /* 转向控制环 */
+/* 直立控制环 */
+static pid_param_t car_pid = 
+{
+    .kp = 50,
+    .kd = 50,
+    .pre_error = 0,
+};
+/* 速度控制环 */
+static pid_param_t speed_pid =
+{
+    .kp = 0.1,
+    .ki = 0.003,
+    .limit_integral = 4000,
+    .pre_error = 0,
+};
+/* 转向控制环 */
+static pid_param_t turn_pid = 
+{
+    .kp = 0.05,
+    .ki = 0.005,
+    .limit_integral = 20000,
+    .pre_error = 0,
+};
 
 
 /******************************************************************************/
@@ -20,8 +40,6 @@ void task_car_pid_control_5ms(float angle_measure)
     
     if (angle_measure > -30 && angle_measure < 30)
     {
-        car_pid.kp = 50;
-        car_pid.kd = 50;
         balance_control(&car_pid, speed_pid.out, angle_measure);
         
         motor_pwm[MOTOR_L] = -car_pid.out - turn_pid.out;
@@ -39,14 +57,7 @@ void task_car_pid_control_5ms(float angle_measure)
 /******************************************************************************/
 void task_car_pid_control_20ms(int16_t speed_target, int16_t turn_target, float speed_measure, float gyroz)
 {
-    speed_pid.kp = 0.1;
-    speed_pid.ki = 0.003;
-    speed_pid.limit_integral = 4000;
     speed_control(&speed_pid, speed_target, speed_measure);
-
-    turn_pid.kp = 0.05;
-    turn_pid.ki = 0.005;
-    turn_pid.limit_integral = 20000;
     turn_control(&turn_pid, turn_target, gyroz);
 }
 

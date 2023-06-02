@@ -14,7 +14,6 @@ typedef struct
     float integral;         /* 积分项 */
     float differ;           /* 微分项 */
     float pre_error;        /* 上一次偏差 */
-    float ppre_error;       /* 上上次偏差（增量PID用） */
     
     float out;
 } pid_param_t;

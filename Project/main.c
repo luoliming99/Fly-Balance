@@ -19,6 +19,7 @@
 #include "common.h"
 #include "fly.h"
 #include "car.h"
+#include "string.h"     /* memset() */
 
 
 extern uint8_t g_2ms_flag;
@@ -44,21 +45,19 @@ int main( void )
     unlock_status_e unlock_status   = UNLOCK_INIT;
     
 #if (PRODUCT == FLY)
-    
     uint16_t accelerator  = 0;  /* 30 ~ 900 */
     int16_t  pitch_target = 0;  /* -30°~ 30° */
     int16_t  yaw_target   = 0;  /* -180°~ 180° */
     int16_t  roll_target  = 0;  /* -30°~ 30° */
     
     key_status_e    key_val         = NO_KEY_PRESS;
-    
 #elif (PRODUCT == CAR)
-    
-    float speed_measure, speed_after_filter, gyroz_after_filter;
+    float speed_measure, speed_after_filter = 0, gyroz_after_filter = 0;
     int16_t speed_target = 0;   /* 行走速度，单位：r/min */
     int16_t turn_target  = 0;   /* 转向速度 */
-    
 #endif
+
+    memset(&mpu_data, 0, sizeof(mpu_result_t));
  
 
     NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
@@ -68,7 +67,6 @@ int main( void )
     i2c_init();
     pwm_init();
     adc_init();
-//    tim_init(); /* TIM1与SPI2同时开启冲突，SPI通信不正常 */
 
 #if (PRODUCT == CAR)
     encoder_l_tim_init();
@@ -165,7 +163,6 @@ int main( void )
             g_200ms_flag = 0;
             float batt_last = (float)g_adc_val[0] / 4095 * 3.3 * 1.36;
             batt_volt = batt_aver_filter(batt_last);
-//            printf("%.2f\r\n", batt_volt);
         }
     }
 }
