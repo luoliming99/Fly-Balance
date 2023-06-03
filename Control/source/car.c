@@ -69,7 +69,7 @@ int task_car_communication(unlock_status_e *unlock_status, int16_t *speed_target
     uint8_t nrf_tx_buf[PLOAD_WIDTH_MAX] = {0};
     
     /* 装载要回传给遥控器的数据 */
-    memcpy(nrf_tx_buf, (const char *)"CAR", 4);
+    memcpy(nrf_tx_buf, (const char *)"CAS", 4);
     *(uint16_t *)&nrf_tx_buf[4] = (uint16_t)(batt_volt * 100 + 0.5);    /* 电池电量 */
     *(int16_t *)&nrf_tx_buf[6]  = (int16_t)(speed_measure + 0.5);       /* 速度 */
     *(int16_t *)&nrf_tx_buf[8]  = (int16_t)(gyroz + 0.5);               /* Z轴角速度值 */

@@ -9,7 +9,7 @@
 #if (PRODUCT == FLY)
 
 /* 俯仰角速度环 */
-static pid_param_t pitch_rate_pid
+static pid_param_t pitch_angle_pid =
 {
     .kp = 6,
     .ki = 0,
@@ -17,7 +17,7 @@ static pid_param_t pitch_rate_pid
     .pre_error = 0,
 };
 /* 横滚角速度环 */
-static pid_param_t roll_rate_pid
+static pid_param_t roll_angle_pid =
 {
     .kp = 6,
     .ki = 0,
@@ -25,7 +25,7 @@ static pid_param_t roll_rate_pid
     .pre_error = 0,
 };
 /* 偏航角速度环 */
-static pid_param_t yaw_rate_pid
+static pid_param_t yaw_angle_pid =
 {
     .kp = 10,
     .ki = 0,
@@ -34,7 +34,7 @@ static pid_param_t yaw_rate_pid
 };
 
 /* 俯仰角度环 */
-static pid_param_t pitch_angle_pid
+static pid_param_t pitch_rate_pid =
 {
     .kp = 3,
     .ki = 0,
@@ -42,7 +42,7 @@ static pid_param_t pitch_angle_pid
     .pre_error = 0,
 };
 /* 横滚角度环 */
-static pid_param_t roll_angle_pid
+static pid_param_t roll_rate_pid =
 {
     .kp = 3,
     .ki = 0,
@@ -50,7 +50,7 @@ static pid_param_t roll_angle_pid
     .pre_error = 0,
 };
 /* 偏航角度环 */
-static pid_param_t yaw_angle_pid
+static pid_param_t yaw_rate_pid =
 {
     .kp = 1,
     .ki = 0,
@@ -87,7 +87,7 @@ int task_fly_communication(unlock_status_e *unlock_status, uint16_t *accelerator
     uint8_t nrf_tx_buf[PLOAD_WIDTH_MAX] = {0};
     
     /* 装载要回传给遥控器的数据 */
-    memcpy(nrf_tx_buf, (const char *)"FLY", 4);
+    memcpy(nrf_tx_buf, (const char *)"FLZ", 4);
     *(uint16_t *)&nrf_tx_buf[4] = (uint16_t)(batt_volt * 100 + 0.5);    /* 电池电量 */
     *(int16_t *)&nrf_tx_buf[6]  = (int16_t)(mpu_data->pitch + 0.5);     /* 俯仰角 */
     *(int16_t *)&nrf_tx_buf[8]  = (int16_t)(mpu_data->roll + 0.5);      /* 横滚角 */

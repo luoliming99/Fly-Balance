@@ -7,7 +7,7 @@
 
 #define FLY                     1
 #define CAR                     2
-#define PRODUCT                 CAR             /* 产品定义：FLY - 四轴飞行器，CAR - 两轮平衡车 */
+#define PRODUCT                 FLY             /* 产品定义：FLY - 四轴飞行器，CAR - 两轮平衡车 */
 
 #define PI                      3.1415927F
 #define RADIAN_TO_ANGLE	        57.2957795F     /* 180/PI */

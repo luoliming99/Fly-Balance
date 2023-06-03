@@ -6,7 +6,7 @@ static int16_t _real_pwm[MOTOR_NUM] = {0};
 
 #if (PRODUCT == CAR)
 
-#define __MOTOR_STAT_MIN_VAL    700     /* 电机转动下限值 */
+#define __MOTOR_STAT_MIN_VAL    680     /* 电机转动下限值 */
 
 #endif
 
