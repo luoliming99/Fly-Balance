@@ -46,7 +46,7 @@ void task_car_pid_control_5ms(float angle_measure)
         motor_pwm[MOTOR_R] = -car_pid.out + turn_pid.out;
         motor_driver_all(motor_pwm);
     }
-    else
+    else if (angle_measure < -45 || angle_measure > 45)
     {
         speed_pid.integral = 0;
         turn_pid.integral = 0;
