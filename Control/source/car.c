@@ -50,7 +50,8 @@ void task_car_pid_control_5ms(float angle_measure)
     {
         speed_pid.integral = 0;
         turn_pid.integral = 0;
-        motor_brake_all(1);     /* 让电机慢慢减速，防止骤停导致电源纹波过大 */
+        motor_stop_all();
+//        motor_brake_all(1);     /* 让电机慢慢减速，防止骤停导致电源纹波过大 */
     }
 }
 
