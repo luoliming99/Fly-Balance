@@ -90,7 +90,7 @@ int main( void )
     ret = nrf24l01_init();
     printf("nrf24l01_init %d\r\n", ret);
     nrf24l01_rx_mode();
-            
+        
     while (1)
     {
         if (1 == g_2ms_flag)    /* 400us */
@@ -112,14 +112,7 @@ int main( void )
 #if (PRODUCT == FLY)
             if (UNLOCK_SUCCESS == unlock_status)
             {
-                if (accelerator == 0)
-                {
-                    motor_stop_all();
-                }
-                else
-                {
-                    task_fly_pid_control_5ms(accelerator, pitch_target, yaw_target, roll_target, &mpu_data);
-                }
+                task_fly_pid_control_5ms(accelerator, pitch_target, yaw_target, roll_target, &mpu_data);
             }
 #elif (PRODUCT == CAR)
             task_car_pid_control_5ms(mpu_data.roll);

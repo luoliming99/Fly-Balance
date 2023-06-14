@@ -63,19 +63,26 @@ void task_fly_pid_control_5ms(uint16_t accelerator, int16_t pitch_target, int16_
 {
     int16_t motor_pwm[MOTOR_NUM] = {0};
     
-    pid_postion_cal(&pitch_angle_pid, pitch_target, mpu_data->pitch);
-    pid_postion_cal(&roll_angle_pid, roll_target, mpu_data->roll);
-    pid_postion_cal(&yaw_angle_pid, yaw_target, mpu_data->yaw);
+    if (accelerator > 0)
+    {
+        pid_postion_cal(&pitch_angle_pid, pitch_target, mpu_data->pitch);
+        pid_postion_cal(&roll_angle_pid, roll_target, mpu_data->roll);
+        pid_postion_cal(&yaw_angle_pid, yaw_target, mpu_data->yaw);
 
-    pid_postion_cal(&pitch_rate_pid, pitch_angle_pid.out, (int16_t)mpu_data->gyro_y >> 4);
-    pid_postion_cal(&roll_rate_pid, roll_angle_pid.out, (int16_t)mpu_data->gyro_x >> 4);
-    pid_postion_cal(&yaw_rate_pid, yaw_angle_pid.out, (int16_t)mpu_data->gyro_z >> 4);
+        pid_postion_cal(&pitch_rate_pid, pitch_angle_pid.out, (int16_t)mpu_data->gyro_y >> 4);
+        pid_postion_cal(&roll_rate_pid, roll_angle_pid.out, (int16_t)mpu_data->gyro_x >> 4);
+        pid_postion_cal(&yaw_rate_pid, yaw_angle_pid.out, (int16_t)mpu_data->gyro_z >> 4);
 
-    motor_pwm[MOTOR_LF] = pitch_rate_pid.out - roll_rate_pid.out - yaw_rate_pid.out + accelerator;
-    motor_pwm[MOTOR_RF] = pitch_rate_pid.out + roll_rate_pid.out + yaw_rate_pid.out + accelerator;
-    motor_pwm[MOTOR_LB] = -pitch_rate_pid.out - roll_rate_pid.out + yaw_rate_pid.out + accelerator;
-    motor_pwm[MOTOR_RB] = -pitch_rate_pid.out + roll_rate_pid.out - yaw_rate_pid.out + accelerator;
-    motor_driver_all(motor_pwm);
+        motor_pwm[MOTOR_LF] = pitch_rate_pid.out - roll_rate_pid.out - yaw_rate_pid.out + accelerator;
+        motor_pwm[MOTOR_RF] = pitch_rate_pid.out + roll_rate_pid.out + yaw_rate_pid.out + accelerator;
+        motor_pwm[MOTOR_LB] = -pitch_rate_pid.out - roll_rate_pid.out + yaw_rate_pid.out + accelerator;
+        motor_pwm[MOTOR_RB] = -pitch_rate_pid.out + roll_rate_pid.out - yaw_rate_pid.out + accelerator;
+        motor_driver_all(motor_pwm);
+    }
+    else
+    {
+        motor_stop_all();
+    }
 }
 
 /******************************************************************************/

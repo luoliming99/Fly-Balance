@@ -53,8 +53,6 @@ void motor_driver_all(int16_t pwm[MOTOR_NUM])
         } else if (pwm[i] > 1000) {
             pwm[i] = 1000;
         }
-    
-        _real_pwm[i] = pwm[i];
 
         motor_driver((which_motor_e)i, pwm[i]);
     }
