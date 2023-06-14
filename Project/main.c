@@ -127,7 +127,7 @@ int main( void )
             if (ret == 0)
             {   
                 led_set(LED_LB, TOGGLE);
-                task_fly_recv_data_handler(&accelerator, &yaw_target, key_val);
+                task_fly_recv_data_handler(&yaw_target, key_val);
             }
             else
             {

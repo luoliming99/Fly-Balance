@@ -62,8 +62,18 @@ static pid_param_t yaw_rate_pid =
 void task_fly_pid_control_5ms(uint16_t accelerator, int16_t pitch_target, int16_t yaw_target, int16_t roll_target, mpu_result_t *mpu_data)
 {
     int16_t motor_pwm[MOTOR_NUM] = {0};
+    static uint8_t flag = 0;
     
-    if (accelerator > 0)
+    if (accelerator < 100)
+    {
+        flag = 0;
+    }
+    else if (accelerator > 300)
+    {
+        flag = 1;
+    }
+    
+    if (flag)
     {
         pid_postion_cal(&pitch_angle_pid, pitch_target, mpu_data->pitch);
         pid_postion_cal(&roll_angle_pid, roll_target, mpu_data->roll);
@@ -133,18 +143,10 @@ int task_fly_communication(unlock_status_e *unlock_status, uint16_t *accelerator
 }
 
 /******************************************************************************/
-void task_fly_recv_data_handler(uint16_t *accelerator, int16_t *yaw_target, key_status_e key_val)
+void task_fly_recv_data_handler(int16_t *yaw_target, key_status_e key_val)
 {
     static float rudder_val = 180.0;   /* ¥Ú∂Ê÷µ(0°„ ~ 360°„) */
-    
-    if (*accelerator < 300)
-    {
-        *accelerator = 0;
-    }
-//    else
-//    {
-//        *accelerator = 300;
-//    }
+
     switch (key_val)
     {
         case KEY_L_PRESS: 

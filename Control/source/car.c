@@ -37,8 +37,18 @@ static pid_param_t turn_pid =
 void task_car_pid_control_5ms(float angle_measure)
 {
     int16_t motor_pwm[MOTOR_NUM] = {0};
+    static uint8_t flag = 0;
     
-    if (angle_measure > -30 && angle_measure < 30)
+    if (angle_measure < -45 || angle_measure > 45)
+    {
+        flag = 0;
+    }
+    else if (angle_measure > -30 && angle_measure < 30)
+    {
+        flag = 1;
+    }
+    
+    if (flag)
     {
         balance_control(&car_pid, speed_pid.out, angle_measure);
         
@@ -46,7 +56,7 @@ void task_car_pid_control_5ms(float angle_measure)
         motor_pwm[MOTOR_R] = -car_pid.out + turn_pid.out;
         motor_driver_all(motor_pwm);
     }
-    else if (angle_measure < -45 || angle_measure > 45)
+    else
     {
         speed_pid.integral = 0;
         turn_pid.integral = 0;
