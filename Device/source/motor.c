@@ -2,8 +2,6 @@
 #include "bsp_pwm.h"
 
 
-static int16_t _real_pwm[MOTOR_NUM] = {0};
-
 #if (PRODUCT == CAR)
 
 #define __MOTOR_STAT_MIN_VAL    680     /* 电机转动下限值，不同电机微调范围±30 */
@@ -79,8 +77,6 @@ void motor_driver_all(int16_t pwm[MOTOR_NUM])
             pwm[i] = 1000;
         }
         
-        _real_pwm[i] = pwm[i];
-        
         motor_driver((which_motor_e)i, pwm[i]);
     }
 #endif
@@ -92,27 +88,5 @@ void motor_stop_all(void)
     for (uint8_t i = 0; i < MOTOR_NUM; i++)
     {
         motor_driver((which_motor_e)i, 0);
-    }
-}
-
-/******************************************************************************/
-void motor_brake_all(uint16_t factor)
-{
-    for (uint8_t i = 0; i < MOTOR_NUM; i++)
-    {
-        if (_real_pwm[i] > factor)
-        {
-            _real_pwm[i] -= factor;
-        }
-        else if (_real_pwm[i] < -factor)
-        {
-            _real_pwm[i] += factor;
-        }
-        else
-        {
-            _real_pwm[i] = 0;
-        }
-        
-        motor_driver((which_motor_e)i, _real_pwm[i]);
     }
 }
