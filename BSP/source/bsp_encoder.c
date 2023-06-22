@@ -49,8 +49,8 @@ void encoder_r_tim_init(void)
     TIM_ICInitTypeDef       TIM_ICInitStructure = {0}; 
     
     /*  ±÷” πƒ‹ */
-    ENCODER_L_GPIO_CLK_CMD(ENCODER_R_GPIO_CLK, ENABLE);
-    ENCODER_L_TIM_CLK_CMD(ENCODER_R_TIM_CLK, ENABLE);
+    ENCODER_R_GPIO_CLK_CMD(ENCODER_R_GPIO_CLK, ENABLE);
+    ENCODER_R_TIM_CLK_CMD(ENCODER_R_TIM_CLK, ENABLE);
 
     /* GPIO≈‰÷√ */
     GPIO_InitStructure.GPIO_Pin = ENCODER_R_GPIO_PIN;
