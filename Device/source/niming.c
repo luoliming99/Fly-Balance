@@ -39,7 +39,7 @@ static int __niming_report(uint8_t fun, uint8_t *p_buf, uint8_t len)
 /******************************************************************************/
 void niming_report_imu(mpu_result_t *p_data)
 {
-	uint8_t buf[28] = {0};
+    uint8_t buf[28] = {0};
     
     buf[0] = (int16_t)p_data->accel_x >> 8;
     buf[1] = (int16_t)p_data->accel_x;
@@ -72,13 +72,13 @@ void niming_report_imu(mpu_result_t *p_data)
     
     /* buf[24]~buf[27]Ó¦Ìî³ä0 */
     
-	__niming_report(0XAF, buf, 28);    /* ·É¿ØÏÔÊ¾Ö¡£º0XAF */
+    __niming_report(0XAF, buf, 28);    /* ·É¿ØÏÔÊ¾Ö¡£º0XAF */
 }
 
 /******************************************************************************/
 void niming_report_data(mpu_result_t *p_data)
 {
-	uint8_t buf[30] = {0};
+    uint8_t buf[30] = {0};
     
     buf[0] = p_data->accel_xreg >> 8;
     buf[1] = p_data->accel_xreg;
@@ -125,5 +125,5 @@ void niming_report_data(mpu_result_t *p_data)
     buf[28] = (int16_t)(p_data->yaw * 10) >> 8;
     buf[29] = (int16_t)(p_data->yaw * 10);
     
-	__niming_report(0XA1, buf, 30);    /* ¹Û²ì²¨ÐÎ£º0xA1 */
+    __niming_report(0XA1, buf, 30);    /* ¹Û²ì²¨ÐÎ£º0xA1 */
 }

@@ -23,7 +23,7 @@ typedef int (*pfn_i2c_write) (uint8_t slave_addr,
 #define MPU_REG_ACCEL_CONFIG    0x1C
 #define MPU_REG_ACCEL_CONFIG_2  0x1D
 #define MPU_REG_ACCEL_XOUT_H    0x3B
-#define MPU_REG_TEMP_OUT_H		0X41
+#define MPU_REG_TEMP_OUT_H      0X41
 #define MPU_REG_WHO_AM_I        0x75
 
 

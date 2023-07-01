@@ -26,10 +26,10 @@ static void __tim_mode_config(void)
      * 中断频率 = 144M / (TIM_Prescaler + 1) / (TIM_Period + 1)
      *          = 1000Hz
      */
-	TIM_TimeBaseStructure.TIM_Period = 1000-1;
-	TIM_TimeBaseStructure.TIM_Prescaler = 144-1;
-	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
-	TIM_TimeBaseInit(TIM_x, &TIM_TimeBaseStructure);
+    TIM_TimeBaseStructure.TIM_Period = 1000-1;
+    TIM_TimeBaseStructure.TIM_Prescaler = 144-1;
+    TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
+    TIM_TimeBaseInit(TIM_x, &TIM_TimeBaseStructure);
 
     TIM_ClearFlag(TIM_x, TIM_FLAG_Update);      /* 清除计数器中断标志位 */
     TIM_ITConfig(TIM_x, TIM_IT_Update, ENABLE); /* 使能计数器中断 */

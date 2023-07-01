@@ -14,7 +14,7 @@ static const int16_t _gyro_val_limit = 200;
 
 static void _mpu_get_offset(void)
 {
-	mpu_result_t raw_data;
+    mpu_result_t raw_data;
     uint8_t correct_cnt = 0;
     int32_t offset_sum[6] = {0};
     uint8_t i;
@@ -195,8 +195,8 @@ void imu_update(mpu_result_t *p_data)
     vz = q0 * q0 - q1 * q1 - q2 * q2 + q3 * q3;
     
     ex = ay * vz - az * vy;
-	ey = az * vx - ax * vz;
-	ez = ax * vy - ay * vx;
+    ey = az * vx - ax * vz;
+    ez = ax * vy - ay * vx;
     
     ex_int = ex_int + ex * _ki;
     ey_int = ey_int + ey * _ki;
@@ -218,10 +218,10 @@ void imu_update(mpu_result_t *p_data)
     q3 = q3_last + (-q2_last * gx + q1_last * gy + q0_last * gz) * _hlaf_period;
     
     norm = _fast_inv_sqrt(q0 * q0 + q1 * q1 + q2 * q2 + q3 * q3);
-	q0 = q0 * norm;
-	q1 = q1 * norm;
-	q2 = q2 * norm;
-	q3 = q3 * norm;
+    q0 = q0 * norm;
+    q1 = q1 * norm;
+    q2 = q2 * norm;
+    q3 = q3 * norm;
 }
 
 /******************************************************************************/

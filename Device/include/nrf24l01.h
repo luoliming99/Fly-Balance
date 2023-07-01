@@ -28,9 +28,9 @@
 #define RF_SETUP        0x06  //RF寄存器;bit3:传输速率(0:1Mbps,1:2Mbps);bit2:1,发射功率;bit0:低噪声放大器增益
 #define STATUS          0x07  //状态寄存器;bit0:TX FIFO满标志;bit3:1,接收数据通道号(最大:6);bit4,达到最多次重发
                               //bit5:数据发送完成中断;bit6:接收数据中断;
-#define MAX_TX  		0x10  //达到最大发送次数中断
-#define TX_OK   		0x20  //TX发送完成中断
-#define RX_OK   		0x40  //接收到数据中断
+#define MAX_TX          0x10  //达到最大发送次数中断
+#define TX_OK           0x20  //TX发送完成中断
+#define RX_OK           0x40  //接收到数据中断
 
 #define OBSERVE_TX      0x08  //发送检测寄存器,bit7:4,数据包丢失计数器;bit3:0,重发计数器
 #define CD              0x09  //载波检测寄存器,bit0,载波检测;
@@ -56,10 +56,10 @@
 #define R_RX_PL_WID     0x60
 
 //24L01发送接收数据宽度定义
-#define TX_ADR_WIDTH    5   	//5字节的地址宽度
-#define RX_ADR_WIDTH    5   	//5字节的地址宽度
-#define TX_PLOAD_WIDTH  32  	//32字节的用户数据宽度
-#define RX_PLOAD_WIDTH  32  	//32字节的用户数据宽度
+#define TX_ADR_WIDTH    5       //5字节的地址宽度
+#define RX_ADR_WIDTH    5       //5字节的地址宽度
+#define TX_PLOAD_WIDTH  32      //32字节的用户数据宽度
+#define RX_PLOAD_WIDTH  32      //32字节的用户数据宽度
 
 #define PLOAD_WIDTH_MIN 1       //payload字节宽度最小值
 #define PLOAD_WIDTH_MAX 32      //payload字节宽度最大值

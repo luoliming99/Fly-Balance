@@ -11,8 +11,8 @@ static void __spi_gpio_config(void)
 {
     GPIO_InitTypeDef  GPIO_InitStructure = {0}; 
 
-	SPI_GPIO_CLK_CMD(SPI_GPIO_CLK, ENABLE);     /* 使能GPIO时钟 */
-	
+    SPI_GPIO_CLK_CMD(SPI_GPIO_CLK, ENABLE);     /* 使能GPIO时钟 */
+
     /* GPIO配置 */
     GPIO_InitStructure.GPIO_Pin = SPI_CSN_PIN;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;

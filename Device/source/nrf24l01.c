@@ -9,9 +9,9 @@ static void __nrf24l01_gpio_config(void)
 {
     GPIO_InitTypeDef  GPIO_InitStructure; 
 
-	/* 使能相关时钟 */
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
-	
+    /* 使能相关时钟 */
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
+    
     /* GPIO配置 */
     GPIO_InitStructure.GPIO_Pin = NRF24L01_CE_PIN;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
@@ -57,7 +57,7 @@ void nrf24l01_tx_mode(void)
 {
     NRF24L01_CE_LOW;
 
-  	spi_write(NRF_WRITE_REG+TX_ADDR, TX_ADR_WIDTH, (uint8_t *)tx_addr);     /* 设置TX节点地址 */
+      spi_write(NRF_WRITE_REG+TX_ADDR, TX_ADR_WIDTH, (uint8_t *)tx_addr);     /* 设置TX节点地址 */
     spi_write(NRF_WRITE_REG+RX_ADDR_P0, TX_ADR_WIDTH, (uint8_t *)tx_addr);  /* 设置通道0接收地址 */
     spi_write_reg(NRF_WRITE_REG+EN_AA, 0x01);                               /* 使能通道0的自动应答 */
     spi_write_reg(NRF_WRITE_REG+EN_RXADDR, 0x01);                           /* 使能通道0的接收地址 */
@@ -69,7 +69,7 @@ void nrf24l01_tx_mode(void)
     spi_write_reg(NRF_WRITE_REG+FEATURE, 0x06);                             /* Enables Dynamic Payload Length, Enables Payload with ACK */
     spi_write_reg(NRF_WRITE_REG+DYNPD, 0x01);                               /* Enable dynamic payload length data pipe 0 */
     
-	NRF24L01_CE_HIGH;
+    NRF24L01_CE_HIGH;
 }
 
 /******************************************************************************/
@@ -88,7 +88,7 @@ void nrf24l01_rx_mode(void)
     spi_write_reg(NRF_WRITE_REG+FEATURE, 0x06);                             /* Enables Dynamic Payload Length, Enables Payload with ACK */
     spi_write_reg(NRF_WRITE_REG+DYNPD, 0x01);                               /* Enable dynamic payload length data pipe 0 */
     
-  	NRF24L01_CE_HIGH;
+      NRF24L01_CE_HIGH;
 }
 
 /******************************************************************************/

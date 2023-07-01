@@ -31,7 +31,7 @@ void encoder_r_cnt_get(void)
 {
     _g_r_pulse_cnt = ENCODER_R_TIM_x->CNT;
     
-	_g_r_pulse_cnt = 0x7FFF - _g_r_pulse_cnt;
+    _g_r_pulse_cnt = 0x7FFF - _g_r_pulse_cnt;
 }
 
 /******************************************************************************/

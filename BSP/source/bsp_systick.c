@@ -8,10 +8,10 @@ void systick_init(void)
 {
     /* 1ms÷–∂œ“ª¥Œ */
     if (SysTick_Config(SystemCoreClock / 1000))
-	{ 
-		/* Capture error */ 
-		while (1);
-	}
+    {
+        /* Capture error */ 
+        while (1);
+    }
 }
 
 /******************************************************************************/
