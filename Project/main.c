@@ -93,37 +93,32 @@ int main( void )
         
     while (1)
     {
-        if (1 == g_2ms_flag)    /* 400us */
+        if (1 == g_2ms_flag)
         {
             led_set(LED_LF, TOGGLE);
             g_2ms_flag = 0;
 
-            task_imu_update(&mpu_data);
+            task_imu_update(&mpu_data);     /* 400us */
         }
         if (1 == g_5ms_flag)
         {
             led_set(LED_RF, TOGGLE);
             g_5ms_flag = 0;
             
-            get_euler_angle(&mpu_data);
-                
-//            niming_report_imu(&mpu_data);
-//            niming_report_data(&mpu_data);
+            get_euler_angle(&mpu_data);     /* 60us */
+            
+            niming_report_imu(&mpu_data);   /* 600us */
+            niming_report_data(&mpu_data);  /* 700us */
+            
 #if (PRODUCT == FLY)
             if (UNLOCK_SUCCESS == unlock_status)
             {
                 task_fly_pid_control_5ms(accelerator, pitch_target, yaw_target, roll_target, &mpu_data);
             }
-#elif (PRODUCT == CAR)
-            task_car_pid_control_5ms(mpu_data.roll);
-#endif
-        }
-        if (1 == g_20ms_flag)
-        {
-            g_20ms_flag = 0;
-#if (PRODUCT == FLY)           
+            
             ret = task_fly_communication(&unlock_status, &accelerator, &pitch_target, &yaw_target,
-                                    &roll_target, &key_val, batt_volt, &mpu_data);
+                                            &roll_target, &key_val, &mpu_data, batt_volt);  /* 120us */
+
             if (ret == 0)
             {   
                 led_set(LED_LB, TOGGLE);
@@ -132,13 +127,13 @@ int main( void )
             else
             {
                 led_set(LED_LB, OFF);
-            }
+            }        
 #elif (PRODUCT == CAR)
-            speed_measure = (encoder_l_speed_get() + encoder_r_speed_get()) / 2;
-            speed_after_filter = speed_lpf_filter(speed_measure, speed_after_filter);      
-            gyroz_after_filter = gyroz_lpf_filter(mpu_data.gyro_z, gyroz_after_filter);
+            task_car_pid_control_5ms(mpu_data.roll);
             
-            ret = task_car_communication(&unlock_status, &speed_target, &turn_target, batt_volt, speed_after_filter, gyroz_after_filter);
+            ret = task_car_communication(&unlock_status, &speed_target, &turn_target, 
+                                            &mpu_data, batt_volt);                          /* 120us */                           
+
             if (ret == 0)
             {   
                 led_set(LED_LB, TOGGLE);
@@ -147,6 +142,15 @@ int main( void )
             {
                 led_set(LED_LB, OFF);
             }
+#endif
+        }
+        if (1 == g_20ms_flag)
+        {
+            g_20ms_flag = 0;
+#if (PRODUCT == CAR)           
+            speed_measure = (encoder_l_speed_get() + encoder_r_speed_get()) / 2;
+            speed_after_filter = speed_lpf_filter(speed_measure, speed_after_filter);  
+            gyroz_after_filter = gyroz_lpf_filter(mpu_data.gyro_z, gyroz_after_filter);
             
             task_car_pid_control_20ms(speed_target, turn_target, speed_after_filter, gyroz_after_filter);
 #endif

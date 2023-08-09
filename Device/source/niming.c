@@ -11,10 +11,10 @@
  */
 static int __niming_report(uint8_t fun, uint8_t *p_buf, uint8_t len)
 {
-    uint8_t buf[34];
+    uint8_t buf[36];
     uint8_t i;
     
-    if (len > 30) return -1;
+    if (len > 32) return -1;
     
     buf[len+3] = 0; /* 校验和清零 */
     buf[0] = 0x88;  /* 帧头 */
