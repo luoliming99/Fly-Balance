@@ -22,11 +22,12 @@
 #include "string.h"     /* memset() */
 
 
-extern uint8_t g_2ms_flag;
 extern uint8_t g_5ms_flag;
 extern uint8_t g_20ms_flag;
 extern uint8_t g_200ms_flag;
 
+mpu_result_t g_mpu_data;        /* 姿态数据 */
+uint8_t      g_sys_init_ok = 0; /* 系统初始化完成标志 */
 
 /*********************************************************************
  * @fn      main
@@ -38,8 +39,6 @@ extern uint8_t g_200ms_flag;
 int main( void )
 {
     int ret = 0;
-    mpu_result_t mpu_data;          /* MPU滤波、姿态解算后的数据 */
-    
     float batt_volt = 0;            /* 电池电压，单位：V */
     
     unlock_status_e unlock_status   = UNLOCK_INIT;
@@ -57,8 +56,8 @@ int main( void )
     int16_t turn_target  = 0;   /* 转向速度 */
 #endif
 
-    memset(&mpu_data, 0, sizeof(mpu_result_t));
- 
+    memset(&g_mpu_data, 0, sizeof(mpu_result_t));
+
 
     NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
 
@@ -90,34 +89,29 @@ int main( void )
     ret = nrf24l01_init();
     printf("nrf24l01_init %d\r\n", ret);
     nrf24l01_rx_mode();
+    
+    g_sys_init_ok = 1;  /* 标志系统初始化完成 */
         
     while (1)
     {
-        if (1 == g_2ms_flag)
-        {
-            led_set(LED_LF, TOGGLE);
-            g_2ms_flag = 0;
-
-            task_imu_update(&mpu_data);     /* 400us */
-        }
         if (1 == g_5ms_flag)
         {
             led_set(LED_RF, TOGGLE);
             g_5ms_flag = 0;
             
-            get_euler_angle(&mpu_data);     /* 60us */
+            get_euler_angle(&g_mpu_data);       /* 60us */
             
-            niming_report_imu(&mpu_data);   /* 600us */
-            niming_report_data(&mpu_data);  /* 700us */
+            niming_report_imu(&g_mpu_data);     /* 600us */
+            niming_report_data(&g_mpu_data);    /* 700us */
             
 #if (PRODUCT == FLY)
             if (UNLOCK_SUCCESS == unlock_status)
             {
-                task_fly_pid_control_5ms(accelerator, pitch_target, yaw_target, roll_target, &mpu_data);
+                task_fly_pid_control_5ms(accelerator, pitch_target, yaw_target, roll_target, &g_mpu_data);
             }
             
             ret = task_fly_communication(&unlock_status, &accelerator, &pitch_target, &yaw_target,
-                                            &roll_target, &key_val, &mpu_data, batt_volt);  /* 120us */
+                                            &roll_target, &key_val, &g_mpu_data, batt_volt);    /* 120us */
 
             if (ret == 0)
             {   
@@ -129,10 +123,10 @@ int main( void )
                 led_set(LED_LB, OFF);
             }        
 #elif (PRODUCT == CAR)
-            task_car_pid_control_5ms(mpu_data.roll);
+            task_car_pid_control_5ms(g_mpu_data.roll);
             
             ret = task_car_communication(&unlock_status, &speed_target, &turn_target, 
-                                            &mpu_data, batt_volt);                          /* 120us */                           
+                                            &g_mpu_data, batt_volt);                            /* 120us */                           
 
             if (ret == 0)
             {   
@@ -150,7 +144,7 @@ int main( void )
 #if (PRODUCT == CAR)           
             speed_measure = (encoder_l_speed_get() + encoder_r_speed_get()) / 2;
             speed_after_filter = speed_lpf_filter(speed_measure, speed_after_filter);  
-            gyroz_after_filter = gyroz_lpf_filter(mpu_data.gyro_z, gyroz_after_filter);
+            gyroz_after_filter = gyroz_lpf_filter(g_mpu_data.gyro_z, gyroz_after_filter);
             
             task_car_pid_control_20ms(speed_target, turn_target, speed_after_filter, gyroz_after_filter);
 #endif

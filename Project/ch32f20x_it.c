@@ -13,6 +13,7 @@
 #include "bsp_tim.h"
 #include "encoder.h"
 #include "common.h"
+#include "led.h"
 
 /*********************************************************************
  * @fn      NMI_Handler
@@ -126,7 +127,9 @@ void PendSV_Handler(void)
   }
 }
 
-uint8_t g_2ms_flag = 0;
+extern mpu_result_t g_mpu_data;     /* 姿态数据 */
+extern uint8_t      g_sys_init_ok;  /* 系统初始化完成标志 */
+
 uint8_t g_5ms_flag = 0;
 uint8_t g_20ms_flag = 0;
 uint8_t g_200ms_flag = 0;
@@ -135,7 +138,11 @@ void SysTick_Handler(void)
 {
     if ((g_systick_cnt % 2) == 0)
     {
-        g_2ms_flag = 1;
+        if (g_sys_init_ok)  /* 此2ms任务会读写传感器，要确保传感器已经初始化完成 */
+        {
+            task_imu_update(&g_mpu_data);   /* 400us */
+            led_set(LED_LF, TOGGLE);
+        }
     }
     if ((g_systick_cnt % 5) == 0)
     {
@@ -144,10 +151,13 @@ void SysTick_Handler(void)
     if ((g_systick_cnt % 20) == 0)
     {
 #if (PRODUCT == CAR)
-        encoder_l_cnt_get();
-        encoder_r_cnt_get();
-        encoder_l_cnt_clr();
-        encoder_r_cnt_clr();
+        if (g_sys_init_ok)
+        {
+            encoder_l_cnt_get();
+            encoder_r_cnt_get();
+            encoder_l_cnt_clr();
+            encoder_r_cnt_clr();
+        }
 #endif
         g_20ms_flag = 1;
     } 
