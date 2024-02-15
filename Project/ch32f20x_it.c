@@ -11,6 +11,7 @@
 #include "bsp_uart.h"
 #include "bsp_systick.h"
 #include "bsp_tim.h"
+#include "bsp_iwdg.h"
 #include "encoder.h"
 #include "common.h"
 #include "led.h"
@@ -134,6 +135,13 @@ uint8_t g_5ms_flag = 0;
 uint8_t g_20ms_flag = 0;
 uint8_t g_200ms_flag = 0;
 
+/*
+ * bit 7  : 1,enable; 0,disable.
+ * bit 6  : 1,The watchdog interrupted; 0,The watchdog is not interrupted.
+ * bit 5~0: counter value
+ */
+uint8_t g_comm_wdg_reg = 0;
+
 void SysTick_Handler(void)
 {
     if ((g_systick_cnt % 2) == 0)
@@ -164,6 +172,15 @@ void SysTick_Handler(void)
     if ((g_systick_cnt % 200) == 0)
     {
         g_200ms_flag = 1;
+        if (g_comm_wdg_reg & 0x80)
+        {
+            g_comm_wdg_reg++;
+            if ((g_comm_wdg_reg & 0x3F) > 25)
+            {
+                g_comm_wdg_reg |= 0x40;     /* 看门狗中断发生 */
+                g_comm_wdg_reg &= 0xC0;     /* 清零计数值 */
+            }
+        }        
     } 
     g_systick_cnt++;
     if (g_systick_cnt == 1000000)
@@ -183,7 +200,7 @@ void DEBUG_USART_IRQHandler(void)
     }
 }
 
-void  TIM_IRQHandler(void)
+void TIM_IRQHandler(void)
 {
     if (TIM_GetITStatus(TIM_x, TIM_IT_Update) != RESET) 
     {

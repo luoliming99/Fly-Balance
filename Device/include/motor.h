@@ -5,6 +5,12 @@
 #include "common.h"
 
 
+typedef enum
+{
+    MOTOR_STOP = 0,
+    MOTOR_RUN,
+} motor_status_e;
+
 #if (PRODUCT == FLY)
 
 typedef enum
@@ -15,7 +21,6 @@ typedef enum
     MOTOR_RB,       /* 右后方电机 */
     MOTOR_NUM       /* 电机个数 */
 } which_motor_e;
-
 
 #elif (PRODUCT == CAR)
 

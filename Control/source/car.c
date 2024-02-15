@@ -1,6 +1,5 @@
 #include "car.h"
 #include "pid.h"
-#include "motor.h"
 #include "nrf24l01.h"
 #include "led.h"
 #include "bsp_uart.h"
@@ -34,21 +33,20 @@ static pid_param_t turn_pid =
 
 
 /******************************************************************************/
-void task_car_pid_control_5ms(float angle_measure)
+void task_car_pid_control_5ms(float angle_measure, motor_status_e *motor_status)
 {
     int16_t motor_pwm[MOTOR_NUM] = {0};
-    static uint8_t flag = 0;
     
     if (angle_measure < -45 || angle_measure > 45)
     {
-        flag = 0;
+        *motor_status = MOTOR_STOP;
     }
     else if (angle_measure > -30 && angle_measure < 30)
     {
-        flag = 1;
+        *motor_status = MOTOR_RUN;
     }
     
-    if (flag)
+    if (*motor_status == MOTOR_RUN)
     {
         balance_control(&car_pid, speed_pid.out, angle_measure);
         

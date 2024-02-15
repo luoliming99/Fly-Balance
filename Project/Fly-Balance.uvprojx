@@ -514,6 +514,11 @@
               <FileType>1</FileType>
               <FilePath>..\BSP\source\bsp_encoder.c</FilePath>
             </File>
+            <File>
+              <FileName>bsp_iwdg.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\BSP\source\bsp_iwdg.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -588,6 +593,11 @@
               <FileName>ch32f20x_dma.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\SRC\StdPeriphDriver\src\ch32f20x_dma.c</FilePath>
+            </File>
+            <File>
+              <FileName>ch32f20x_iwdg.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\SRC\StdPeriphDriver\src\ch32f20x_iwdg.c</FilePath>
             </File>
           </Files>
         </Group>
