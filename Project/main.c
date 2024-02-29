@@ -130,6 +130,11 @@ int main( void )
 #elif (PRODUCT == CAR)
             task_car_pid_control_5ms(g_mpu_data.roll, &motor_status);
             
+            if (UNLOCK_SUCCESS == unlock_status)
+            {
+                comm_wdg_enable();
+            }
+            
             ret = task_car_communication(&unlock_status, &speed_target, &turn_target, 
                                             &g_mpu_data, batt_volt);                            /* 120us */                           
 
